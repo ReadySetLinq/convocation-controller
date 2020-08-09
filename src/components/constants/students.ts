@@ -4,7 +4,7 @@ import { editTakeItemProps } from '../interface/students';
 
 export const defaultEditTakeItemProps: editTakeItemProps = {
 	uuid: generate(),
-	propName: 'Text',
+	propName: '',
 	takeID: -1,
 	objName: '',
 	value: '',
