@@ -1,32 +1,7 @@
 // Type Exports
-export type UUID = string | null;
-
 export type Name = string;
 
 // Interface Exports
-export interface UUID_Name {
-	uuid: string | null;
-	name: string;
-}
-
-export interface UUID_Name_Value {
-	uuid: string | null;
-	name: string;
-	value: string;
-}
-
-export interface UUID_Name_Values {
-	uuid: string | null;
-	name: string;
-	values: string[];
-}
-
-export interface UUID_Name_Index {
-	uuid: string | null;
-	name: string;
-	index: number;
-}
-
 export interface UUID_TakeID {
 	uuid: string | null;
 	takeID: number;

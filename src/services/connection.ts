@@ -238,50 +238,23 @@ export class Connection implements ConnectionImplimentations {
 										action: _msg.data.action,
 										response: _msg.data.value.response,
 									});
-								} else if (isEqual(_msg.data.action, 'GetTakeItemLayer')) {
-									Emitter.emit(`takeItem-${_msg.data.value.takeID}`, {
+								} else {
+									Emitter.emit(`${_msg.data.value.uuid}`, {
 										uuid: _msg.data.value.uuid,
 										takeID: _msg.data.value.takeID,
 										action: _msg.data.action,
 										response: _msg.data.value.response,
 									});
 								}
+
+								break;
+							default:
 								Emitter.emit(`${_msg.data.value.uuid}`, {
 									uuid: _msg.data.value.uuid,
 									takeID: _msg.data.value.takeID,
 									action: _msg.data.action,
 									response: _msg.data.value.response,
 								});
-
-								break;
-							case 'widget':
-								if (
-									isEqual(_msg.data.action, 'GetCounterWidgetValue') ||
-									isEqual(_msg.data.action, 'EditCounterWidget') ||
-									isEqual(_msg.data.action, 'IncreaseCounterWidget') ||
-									isEqual(_msg.data.action, 'DecreaseCounterWidget')
-								) {
-									Emitter.emit(`counter-widget-${_msg.data.value.name}`, {
-										uuid: _msg.data.value.uuid,
-										name: _msg.data.value.name,
-										action: _msg.data.action,
-										response: _msg.data.value.response,
-									});
-								} else if (
-									isEqual(_msg.data.action, 'GetTextListWidgetItemIndex') ||
-									isEqual(_msg.data.action, 'GetTextListWidgetValues') ||
-									isEqual(_msg.data.action, 'SetTextListWidgetItemIndex') ||
-									isEqual(_msg.data.action, 'SetTextListWidgetValues')
-								) {
-									Emitter.emit(`textlist-widget-${_msg.data.value.name}`, {
-										uuid: _msg.data.value.uuid,
-										name: _msg.data.value.name,
-										action: _msg.data.action,
-										response: _msg.data.value.response,
-									});
-								}
-								break;
-							default:
 								break;
 						}
 					}
