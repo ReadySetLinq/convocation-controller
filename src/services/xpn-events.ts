@@ -1,5 +1,6 @@
 import Emitter from './emitter';
-import { Name, UUID_TakeID, UUID_TakeID_ObjName_Value_PropName } from './interfaces/xpn-events';
+
+import { UUID, UUID_TakeID, UUID_TakeID_ObjName_Value_PropName } from './interfaces/xpn-events';
 
 export class XPN_Events {
 	public addListeners = () => {
@@ -19,13 +20,15 @@ export class XPN_Events {
 
 export const events = {
 	// Main
-	'xpn.joinService': (name: Name = '') => {
+	'xpn.start': ({ uuid = null }: UUID) => {
 		Emitter.emit(
 			'conn.sendMessage',
 			JSON.stringify({
-				service: 'join',
+				service: 'xpression',
 				data: {
-					name,
+					category: 'main',
+					action: 'start',
+					properties: { uuid },
 				},
 			}),
 		);

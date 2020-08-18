@@ -2,13 +2,13 @@ export interface StudentData {
 	id: string | number;
 	name: string;
 	extra: string;
-	multiplyer: number;
+	multiplier: number;
 	displayName: string;
 }
 
 export interface StudentsStoreState {
 	isLoading: boolean;
-	xpnStarted: boolean;
+	loggedIn: boolean;
 	ctrlStarted: boolean;
 	isExtraOnline: boolean;
 	isOnline: boolean;

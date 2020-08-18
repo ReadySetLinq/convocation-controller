@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { Grid, Button } from '@material-ui/core';
+import { Grid, Button, Paper } from '@material-ui/core';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import { isEqual, isEmpty, sortBy, filter, findIndex } from 'lodash';
 import { generate } from 'shortid';
 
@@ -9,7 +10,7 @@ import { getProgramStudents, getProgramStudentsLength } from '../stores/selector
 import Emitter from '../services/emitter';
 import NetworkConnection from '../views/network-connection';
 import { useStyles } from '../services/constants/styles';
-import { getDataValue } from '../services/utilities';
+import { getDataValue, connection } from '../services/utilities';
 import { gsData, clearGoogleCache } from '../services/google-sheets';
 import LoadingSpinner from '../views/loading-spinner';
 import { StudentDisplay, ProgramsDisplay, OnlineButtonsDisplay } from '../views/students';
@@ -21,7 +22,7 @@ import { ConnectionState } from '../services/interfaces/connection';
 import { XPN_TakeItem_Data } from '../services/interfaces/xpn-events';
 import { gsObject } from '../services/interfaces/google-sheets';
 
-import { defaultEditTakeItemProps, loadingStates } from './constants/students';
+import { defaultEditTakeItemProps, loadingStates, Loading } from './constants/students';
 import { defaultConnectionState } from '../services/constants/connection';
 import { defaultProgramName, defaultStudentData } from '../stores/constants/student-store';
 
@@ -36,9 +37,10 @@ const Students = () => {
 	const nextIndex = studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1;
 	let prevStudentsStore = useRef(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
-	let loadStatus = useRef<number>(0);
+	let loadStatus = useRef<Loading>(Loading.CHECKING);
 
 	const editTakeItemProperty = (props: editTakeItemProps) => {
+		console.log('editTakeItemProperty', props);
 		Emitter.emit('xpn.EditTakeItemProperty', {
 			...defaultEditTakeItemProps,
 			...props,
@@ -64,18 +66,18 @@ const Students = () => {
 					? defaultStudentData.extra
 					: String(getDataValue(student, Extra_Column)).replace('*', '').trim();
 
-			const _multiplyer = Number.parseInt(
+			const _multiplier = Number.parseInt(
 				isEmpty(Multiplier) || isEmpty(Multiplier_Column)
-					? defaultStudentData.multiplyer
+					? defaultStudentData.multiplier
 					: getDataValue(student, Multiplier_Column),
 			);
 
 			const _displayName = !isEmpty(_extra)
-				? _multiplyer > 0
-					? `(x${_multiplyer}) ${_name}`
+				? _multiplier > 0
+					? `(x${_multiplier}) ${_name}`
 					: _name
-				: _multiplyer > 0
-				? `(x${_multiplyer}) ${_name}`
+				: _multiplier > 0
+				? `(x${_multiplier}) ${_name}`
 				: _name;
 
 			const studentData: StudentData = {
@@ -83,7 +85,7 @@ const Students = () => {
 				id: _id,
 				name: _name,
 				extra: _extra,
-				multiplyer: !isNaN(_multiplyer) ? _multiplyer : defaultStudentData.multiplyer,
+				multiplier: !isNaN(_multiplier) ? _multiplier : defaultStudentData.multiplier,
 				displayName: String(_displayName).trim(),
 			};
 
@@ -121,7 +123,7 @@ const Students = () => {
 				editTakeItemProperty({
 					takeID: TakeID,
 					objName: Multiplier,
-					value: String(_student.multiplyer),
+					value: String(_student.multiplier),
 				});
 			}
 
@@ -287,7 +289,7 @@ const Students = () => {
 		(forceOffline: boolean = true) => {
 			if (!isMounted.current) return;
 
-			loadStatus.current = 3;
+			loadStatus.current = Loading.RESETTING_STUDENTS;
 
 			setStudentsStore((oldStore) => ({
 				...oldStore,
@@ -299,7 +301,7 @@ const Students = () => {
 			}));
 
 			resetXPNData(forceOffline, () => {
-				loadStatus.current = 4;
+				loadStatus.current = Loading.EMPTY;
 			});
 		},
 		[resetXPNData, setStudentsStore],
@@ -314,7 +316,7 @@ const Students = () => {
 
 			if (!isMounted.current) return;
 
-			loadStatus.current = 1;
+			loadStatus.current = Loading.LOADING_STUDENTS;
 
 			setStudentsStore((oldStore) => ({
 				...oldStore,
@@ -333,7 +335,7 @@ const Students = () => {
 					let _students: any[] = [];
 					let _programs: string[] = [defaultProgramName];
 
-					loadStatus.current = 2;
+					loadStatus.current = Loading.PROCESSING_STUDENTS;
 
 					if (response.errors.length > 0 || response.meta.aborted) {
 						setStudentsStore((oldStore) => ({
@@ -370,7 +372,7 @@ const Students = () => {
 							}).length;
 
 							if (_multiple === 1) {
-								// If this is the first duplicate, add multipler 1 to the origional name
+								// If this is the first duplicate, add multiplier 1 to the original name
 								const _idx = findIndex(_students, (s) => {
 									return (
 										!isEqual(_studentID, getDataValue(s, StudentID)) &&
@@ -406,7 +408,7 @@ const Students = () => {
 				.catch((e) => {
 					if (!isMounted.current) return;
 					console.error(e);
-					loadStatus.current = 4;
+					loadStatus.current = Loading.EMPTY;
 
 					setStudentsStore((oldStore) => ({ ...oldStore, isLoading: false }));
 				});
@@ -458,6 +460,7 @@ const Students = () => {
 
 			setStudentsStore((oldStore) => ({ ...oldStore, selectedIndex: index }));
 			setTimeout(() => {
+				if (!isMounted.current) return;
 				setStudentsStore((oldStore) => ({ ...oldStore, switching: false }));
 			}, _delay);
 		});
@@ -523,11 +526,6 @@ const Students = () => {
 		}
 	};
 
-	const joinController = useCallback(() => {
-		if (!isMounted.current) return;
-		if (!studentsStore.ctrlStarted) Emitter.emit('xpn.joinService', 'controller');
-	}, [studentsStore.ctrlStarted]);
-
 	const getDisplayStudent = (index = -1) => {
 		if (!isMounted.current) return '';
 		let _programStudent = undefined;
@@ -545,7 +543,7 @@ const Students = () => {
 	const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		if (!isMounted.current) return;
 
-		if (connectionState.connected && studentsStore.xpnStarted && studentsStore.ctrlStarted) {
+		if (connectionState.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
 			if (!event.altKey && !event.shiftKey) {
 				switch (event.key) {
 					case 'ArrowLeft':
@@ -587,16 +585,28 @@ const Students = () => {
 			setConnectionState({ connected, connecting, displayMsg }),
 		);
 
-		Emitter.on('xpression-started', () => {
+		Emitter.on('xpression.loggedIn', () => {
 			if (!isMounted.current) return;
-			setStudentsStore((oldStore) => ({ ...oldStore, xpnStarted: true }));
-			prevStudentsStore.current = { ...prevStudentsStore.current, xpnStarted: true };
-			joinController();
+			setStudentsStore((oldStore) => ({ ...oldStore, loggedIn: true }));
+			prevStudentsStore.current = { ...prevStudentsStore.current, loggedIn: true };
+
+			Emitter.emit('xpn.start', { uuid: generate() });
 		});
 
-		Emitter.on('xpression.controllerStarted', () => {
+		Emitter.on('xpression.controllerStarted', (value: { uuid: ''; response: false }) => {
 			if (!isMounted.current) return;
 			const { ExtraTakeID, TakeID } = settingsStore.xpn;
+
+			if (!value.response) {
+				loadStatus.current = Loading.XPN_FAILED;
+				setStudentsStore((oldStore) => ({ ...oldStore, ctrlStarted: false, isLoading: true }));
+				setTimeout(() => {
+					if (!isMounted.current) return;
+					connection.disconnect();
+				}, 3000);
+				return;
+			}
+
 			setStudentsStore((oldStore) => ({ ...oldStore, ctrlStarted: true }));
 
 			if (prevStudentsStore.current.ctrlStarted) {
@@ -647,12 +657,6 @@ const Students = () => {
 
 	useEffect(() => {
 		if (!isMounted.current) return;
-
-		if (!settingsStore.loaded) loadStatus.current = 0;
-	}, [settingsStore.loaded]);
-
-	useEffect(() => {
-		if (!isMounted.current) return;
 		if (studentsStore.programName === prevStudentsStore.current.programName) return;
 		else prevStudentsStore.current = { ...prevStudentsStore.current, programName: studentsStore.programName };
 
@@ -669,13 +673,33 @@ const Students = () => {
 
 	if (!settingsStore.loaded)
 		return (
-			<LoadingSpinner key={`settings.LoadingSpinner-${loadStatus.current}`} label={loadingStates[loadStatus.current]} />
+			<Grid container className={styles.grid} justify='center' spacing={1}>
+				<LoadingSpinner
+					key={`settings.LoadingSpinner-${loadStatus.current}`}
+					label={loadingStates[loadStatus.current]}
+				/>
+			</Grid>
 		);
 
 	if (!connectionState.connected)
 		return <NetworkConnection key={'students.NetworkConnection'} state={connectionState} />;
 
-	if (studentsStore.isLoading || !studentsStore.xpnStarted || !studentsStore.ctrlStarted)
+	if (loadStatus.current === Loading.XPN_FAILED)
+		return (
+			<Grid container className={styles.grid} justify='center' spacing={1}>
+				<Grid item xs={3}></Grid>
+				<Grid item xs={6}>
+					<Paper className={styles.paper}>
+						<Alert key='networkConnection.Alert' severity='error' variant='outlined'>
+							<AlertTitle>{loadingStates[loadStatus.current]}</AlertTitle>
+						</Alert>
+					</Paper>
+				</Grid>
+				<Grid item xs={3}></Grid>
+			</Grid>
+		);
+
+	if (studentsStore.isLoading || !studentsStore.loggedIn || !studentsStore.ctrlStarted)
 		return (
 			<Grid container className={styles.grid} justify='center' spacing={1}>
 				<LoadingSpinner

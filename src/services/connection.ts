@@ -1,36 +1,16 @@
 import { isEqual } from 'lodash';
-import { generate } from 'shortid';
 
 import { XPN_Events } from './xpn-events';
 import { webSockets, objHas } from './utilities';
 import Emitter from './emitter';
 
+import { ConnectionImplementations } from './interfaces/connection';
 import { NetworkSettingsData } from '../components/settings/interfaces/network';
 
 import { defaultConnectionMessage } from './constants/connection';
 import { defaultNetworkSettingsData } from '../components/settings/constants/network';
 
-export interface ConnectionImplimentations {
-	initialized: boolean;
-	connected: boolean;
-	connecting: boolean;
-	autoReconnect: boolean;
-	displayMsg: string;
-	wsReadyState: number;
-	wsConnected: boolean;
-	reconnectTime: number;
-	reconnectInterval: number;
-	settings: NetworkSettingsData;
-	xpnEvents: XPN_Events; // Startup the xpnEvents listeners
-	updateSettings(settings: NetworkSettingsData): void;
-	destroy(): void;
-	connect(): void;
-	disconnect(): Promise<boolean>;
-	reconnect(): void;
-	sendMessage(msg: string): void;
-}
-
-export class Connection implements ConnectionImplimentations {
+export class Connection implements ConnectionImplementations {
 	initialized = false;
 	connected = false;
 	connecting = false;
@@ -134,7 +114,7 @@ export class Connection implements ConnectionImplimentations {
 
 			if (connected) {
 				sendMessage(`{'service': 'logout', 'data': {'userName': '${settings.userName}'}}`);
-				setTimeout(() => {
+				return setTimeout(() => {
 					if (webSockets.ws !== null) webSockets.disconnect(false);
 					this.connecting = false;
 					this.connected = false;
@@ -183,22 +163,17 @@ export class Connection implements ConnectionImplimentations {
 
 	// websocket onmessage event listener
 	onMessage = ({ data = '{}' }) => {
-		const { sendMessage } = this;
-
 		const _msg = JSON.parse(data);
 		if (_msg && objHas.call(_msg, 'service')) {
 			switch (_msg.service) {
 				case 'status':
 					if (objHas.call(_msg, 'data') && objHas.call(_msg.data, 'type')) {
 						switch (_msg.data.type) {
-							case 'joined': {
-								const _joinMsg = _msg.data.message.split(':')[1].trim();
-								if (isEqual(_joinMsg, 'xpression'))
-									sendMessage(
-										`{'service': 'xpression', 'data': {'category': 'main', 'action': 'start', 'properties': { 'uuid': '${generate()}'}}}`,
-									);
-								else if (isEqual(_joinMsg, 'controller'))
-									Emitter.emit('xpression.controllerStarted', {
+							case 'login': {
+								const _loginMsg = _msg.data.message.trim();
+								console.log('');
+								if (_loginMsg === `Logged in as user: ${this.settings.userName}`)
+									Emitter.emit('xpression.loggedIn', {
 										data: _msg.data,
 									});
 								break;
@@ -211,12 +186,8 @@ export class Connection implements ConnectionImplimentations {
 				case 'xpression':
 					if (objHas.call(_msg, 'data') && objHas.call(_msg.data, 'category') && objHas.call(_msg.data, 'action')) {
 						switch (_msg.data.category) {
-							case 'main':
-								if (isEqual(_msg.data.action, 'start')) {
-									if (_msg.data.value && _msg.data.value.response) Emitter.emit('xpression-started', _msg.data.value);
-								}
-								break;
 							case 'takeitem':
+								// Check for generic responses
 								if (isEqual(_msg.data.action, 'SetTakeItemOnline')) {
 									Emitter.emit(`takeItem-${_msg.data.value.takeID}`, {
 										uuid: _msg.data.value.uuid,
@@ -238,15 +209,23 @@ export class Connection implements ConnectionImplimentations {
 										action: _msg.data.action,
 										response: _msg.data.value.response,
 									});
-								} else {
-									Emitter.emit(`${_msg.data.value.uuid}`, {
+								}
+								// Send custom UUID response
+								Emitter.emit(`${_msg.data.value.uuid}`, {
+									uuid: _msg.data.value.uuid,
+									takeID: _msg.data.value.takeID,
+									action: _msg.data.action,
+									response: _msg.data.value.response,
+								});
+
+								break;
+							case 'main':
+								if (isEqual(_msg.data.action, 'start')) {
+									Emitter.emit('xpression.controllerStarted', {
 										uuid: _msg.data.value.uuid,
-										takeID: _msg.data.value.takeID,
-										action: _msg.data.action,
 										response: _msg.data.value.response,
 									});
 								}
-
 								break;
 							default:
 								Emitter.emit(`${_msg.data.value.uuid}`, {
@@ -262,13 +241,13 @@ export class Connection implements ConnectionImplimentations {
 				case 'server':
 					if (objHas.call(_msg, 'data') && objHas.call(_msg.data, 'message')) {
 						if (isEqual(_msg.data.message, 'connected')) {
-							Emitter.emit('xpn.joinService', 'xpression');
 							Emitter.emit('network.connected', {});
 						}
 					}
 
 					break;
 				default:
+					console.warn('Uncaught Message', _msg);
 					Emitter.emit(_msg.service, {
 						..._msg.data,
 					});
@@ -303,10 +282,10 @@ export class Connection implements ConnectionImplimentations {
 }
 
 const ReconnectMsg = (timeout: number = 0, autoReconnect: boolean = true, reason: string = '') => {
-	const attempTime = Math.min(10000 / 1000, (timeout + timeout) / 1000);
+	const attemptTime = Math.min(10000 / 1000, (timeout + timeout) / 1000);
 	let message = 'Connection closed.';
-	if (webSockets.ws !== null && autoReconnect && attempTime > 0)
-		message = `${message} Reconnect will be attempted in ${attempTime} second${attempTime > 1 ? 's' : ''}. ${reason}`;
+	if (webSockets.ws !== null && autoReconnect && attemptTime > 0)
+		message = `${message} Reconnect will be attempted in ${attemptTime} second${attemptTime > 1 ? 's' : ''}. ${reason}`;
 
 	return message.trim();
 };

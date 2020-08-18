@@ -1,5 +1,7 @@
-// Type Exports
-export type Name = string;
+// Interface Exports
+export interface UUID {
+	uuid: string | null;
+}
 
 // Interface Exports
 export interface UUID_TakeID {

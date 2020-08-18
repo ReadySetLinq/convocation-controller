@@ -6,7 +6,7 @@ export const defaultStudentData: StudentData = {
 	id: generate(),
 	name: '',
 	extra: '',
-	multiplyer: 0,
+	multiplier: 0,
 	displayName: '',
 };
 
@@ -14,7 +14,7 @@ export const defaultProgramName = '[Select A Program]';
 
 export const defaultStudentsStoreState: StudentsStoreState = {
 	isLoading: true,
-	xpnStarted: false,
+	loggedIn: false,
 	ctrlStarted: false,
 	isExtraOnline: false,
 	isOnline: false,
