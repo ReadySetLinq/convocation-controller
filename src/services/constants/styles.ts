@@ -185,5 +185,12 @@ export const useStyles = makeStyles((theme: Theme) =>
 		iconButton: {
 			paddingRight: theme.spacing(1),
 		},
+		table: {
+			minWidth: 500,
+		},
+		paginationAct: {
+			flexShrink: 0,
+			marginLeft: theme.spacing(2.5),
+		},
 	}),
 );

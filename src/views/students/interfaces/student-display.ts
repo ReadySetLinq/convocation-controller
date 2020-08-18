@@ -1,3 +1,5 @@
+import { StudentData } from '../../../stores/interfaces/student-store';
+
 export interface StudentDisplayData {
-	getStudent: (index: number) => string;
+	getStudentData: (student?: any) => StudentData;
 }

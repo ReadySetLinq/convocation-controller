@@ -40,7 +40,6 @@ const Students = () => {
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
 
 	const editTakeItemProperty = (props: editTakeItemProps) => {
-		console.log('editTakeItemProperty', props);
 		Emitter.emit('xpn.EditTakeItemProperty', {
 			...defaultEditTakeItemProps,
 			...props,
@@ -526,20 +525,6 @@ const Students = () => {
 		}
 	};
 
-	const getDisplayStudent = (index = -1) => {
-		if (!isMounted.current) return '';
-		let _programStudent = undefined;
-
-		if (studentsLength <= 0) return '';
-		if (index < 0) return '';
-
-		_programStudent = students[index];
-
-		if (Object.is(_programStudent, undefined)) return '';
-
-		return getStudentData(_programStudent).displayName;
-	};
-
 	const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
 		if (!isMounted.current) return;
 
@@ -749,7 +734,7 @@ const Students = () => {
 							<Grid item>
 								<StudentDisplay
 									key={`students.StudentDisplay-${studentsStore.selectedIndex}`}
-									getStudent={getDisplayStudent}
+									getStudentData={getStudentData}
 								/>
 							</Grid>
 						</Grid>

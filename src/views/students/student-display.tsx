@@ -1,27 +1,43 @@
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { Button, FormControl, FormGroup, TextField, InputAdornment } from '@material-ui/core';
-import { isEqual, includes, findIndex } from 'lodash';
+import {
+	Button,
+	FormControl,
+	FormGroup,
+	TextField,
+	InputAdornment,
+	TableContainer,
+	Paper,
+	Table,
+	TableHead,
+	TableRow,
+	TableCell,
+	TableBody,
+	TableFooter,
+	TablePagination,
+} from '@material-ui/core';
+import { isEqual, includes, findIndex, isEmpty } from 'lodash';
 import { generate } from 'shortid';
 
 import { useStyles } from '../../services/constants/styles';
 import { settingsState, studentsState } from '../../stores/atoms';
 import { getProgramStudents, getProgramStudentsLength } from '../../stores/selectors';
+import { PaginationTableActions } from '../pagination-table';
 
 import { StudentDisplayData } from './interfaces/student-display';
+import { StudentData } from '../../stores/interfaces/student-store';
 
-const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudent }) => {
+const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const styles = useStyles();
 	const settingsStore = useRecoilValue(settingsState);
 	const [studentsStore, setStudentsStore] = useRecoilState(studentsState);
 	const students = useRecoilValue(getProgramStudents(studentsStore.programName));
 	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
 	const [searchError, setSearchError] = useState('');
-	const lastIndex = studentsStore.selectedIndex - 1;
+	const [page, setPage] = useState(0);
+	const [rowsPerPage] = useState(10);
 	const nextIndex = studentsStore.selectedIndex + 1;
-	const lastStudent = getStudent(lastIndex);
-	const currentStudent = getStudent(studentsStore.selectedIndex);
-	const nextStudent = getStudent(nextIndex);
+	const selectedStudent = getStudentData(students[studentsStore.selectedIndex]);
 
 	const onSetSelectedID = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -86,10 +102,21 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudent }) => {
 		return;
 	}, [students, setStudentsStore, settingsStore.gs.StudentID, studentsStore.selectedStudentID]);
 
+	const handleChangePage = useCallback((event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+		setPage(newPage);
+	}, []);
+
 	useEffect(() => {
 		// Reset the search error anytime the program changes
 		setSearchError('');
 	}, [studentsStore.programName]);
+
+	useEffect(() => {
+		let newPage = 0;
+		if (studentsStore.selectedIndex > 0) newPage = (studentsStore.selectedIndex / rowsPerPage) | 0;
+		if (newPage !== page) setPage(newPage);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [studentsStore.selectedIndex]);
 
 	return (
 		<FormControl component='fieldset' className={styles.formControl}>
@@ -178,57 +205,60 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudent }) => {
 				/>
 			</FormGroup>
 
-			<FormGroup row className={styles.formGroup}>
-				<FormGroup>
-					<TextField
-						id={`lastStudent-${generate()}`}
-						className={styles.formTextField}
-						type='text'
-						name='lastStudent'
-						variant='outlined'
-						value={lastStudent}
-						title={lastStudent}
-						aria-label={`Last Student was ${lastStudent}`}
-						placeholder='[None]'
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>Last Student:</InputAdornment>,
-							readOnly: true,
-						}}
-					/>
+			<TableContainer component={Paper}>
+				<Table className={styles.table} aria-label='custom pagination table'>
+					<TableHead>
+						<TableRow>
+							<TableCell aria-label='Display Name'>Display Name</TableCell>
+							<TableCell aria-label='ID' align='right'>
+								ID
+							</TableCell>
+							<TableCell aria-label='Multiplier' align='right'>
+								Multiplier
+							</TableCell>
+						</TableRow>
+					</TableHead>
+					<TableBody>
+						{(rowsPerPage > 0 ? students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : students).map(
+							(student: StudentData) => {
+								const studentDisplay = getStudentData(student);
+								if (isEmpty(studentDisplay)) return <></>;
 
-					<TextField
-						id={`currentStudent-${generate()}`}
-						className={styles.formTextField}
-						type='text'
-						name='currentStudent'
-						variant='outlined'
-						value={currentStudent}
-						title={currentStudent}
-						aria-label={`Current Student is ${currentStudent}`}
-						placeholder='[None]'
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>Current Student:</InputAdornment>,
-							readOnly: true,
-						}}
-					/>
-
-					<TextField
-						id={`nextStudent-${generate()}`}
-						className={styles.formTextField}
-						type='text'
-						name='nextStudent'
-						variant='outlined'
-						value={nextStudent}
-						title={nextStudent}
-						aria-label={`Next Student will be ${nextStudent}`}
-						placeholder='[None]'
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>Next Student:</InputAdornment>,
-							readOnly: true,
-						}}
-					/>
-				</FormGroup>
-			</FormGroup>
+								return (
+									<TableRow key={studentDisplay.id} selected={studentDisplay.id === selectedStudent.id}>
+										<TableCell aria-label={studentDisplay.displayName} component='th' scope='row'>
+											{studentDisplay.displayName}
+										</TableCell>
+										<TableCell aria-label={studentDisplay.id.toString()} align='right'>
+											{studentDisplay.id}
+										</TableCell>
+										<TableCell aria-label={studentDisplay.multiplier.toString()} align='right'>
+											{studentDisplay.multiplier}
+										</TableCell>
+									</TableRow>
+								);
+							},
+						)}
+					</TableBody>
+					<TableFooter>
+						<TableRow>
+							<TablePagination
+								rowsPerPageOptions={[10]}
+								colSpan={3}
+								count={studentsLength}
+								rowsPerPage={rowsPerPage}
+								page={page}
+								SelectProps={{
+									inputProps: { 'aria-label': 'rows per page' },
+									native: true,
+								}}
+								onChangePage={handleChangePage}
+								ActionsComponent={PaginationTableActions}
+							/>
+						</TableRow>
+					</TableFooter>
+				</Table>
+			</TableContainer>
 		</FormControl>
 	);
 };
