@@ -171,7 +171,6 @@ export class Connection implements ConnectionImplementations {
 						switch (_msg.data.type) {
 							case 'login': {
 								const _loginMsg = _msg.data.message.trim();
-								console.log('');
 								if (_loginMsg === `Logged in as user: ${this.settings.userName}`)
 									Emitter.emit('xpression.loggedIn', {
 										data: _msg.data,
