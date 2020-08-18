@@ -188,6 +188,9 @@ export const useStyles = makeStyles((theme: Theme) =>
 		table: {
 			minWidth: 500,
 		},
+		tableHeader: {
+			backgroundColor: theme.palette.background.default,
+		},
 		paginationAct: {
 			flexShrink: 0,
 			marginLeft: theme.spacing(2.5),

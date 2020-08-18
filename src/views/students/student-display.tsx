@@ -35,7 +35,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
 	const [searchError, setSearchError] = useState('');
 	const [page, setPage] = useState(0);
-	const [rowsPerPage] = useState(10);
+	const rowsPerPage = 10;
 	const nextIndex = studentsStore.selectedIndex + 1;
 	const selectedStudent = getStudentData(students[studentsStore.selectedIndex]);
 
@@ -112,11 +112,22 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	}, [studentsStore.programName]);
 
 	useEffect(() => {
-		let newPage = 0;
-		if (studentsStore.selectedIndex > 0) newPage = (studentsStore.selectedIndex / rowsPerPage) | 0;
-		if (newPage !== page) setPage(newPage);
+		// Make sure we are always on the correct page based on the new selected index
+		if (studentsStore.selectedIndex === -1) {
+			setPage(0);
+		} else {
+			let newPage = 0;
+			if (studentsStore.selectedIndex > 0) newPage = (studentsStore.selectedIndex / rowsPerPage) | 0;
+			if (newPage !== page) setPage(newPage);
+		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [studentsStore.selectedIndex]);
+
+	useEffect(() => {
+		// Program changed so reset page to 9=0
+		setPage(0);
+	}, [studentsStore.programName]);
 
 	return (
 		<FormControl component='fieldset' className={styles.formControl}>
@@ -209,36 +220,33 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 				<Table className={styles.table} aria-label='custom pagination table'>
 					<TableHead>
 						<TableRow>
-							<TableCell aria-label='Display Name'>Display Name</TableCell>
-							<TableCell aria-label='ID' align='right'>
+							<TableCell className={styles.tableHeader} aria-label='ID' align='left'>
 								ID
 							</TableCell>
-							<TableCell aria-label='Multiplier' align='right'>
-								Multiplier
+							<TableCell className={styles.tableHeader} aria-label='Display Name' align='center'>
+								Name
 							</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{(rowsPerPage > 0 ? students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : students).map(
-							(student: StudentData) => {
-								const studentDisplay = getStudentData(student);
-								if (isEmpty(studentDisplay)) return <></>;
+						{students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((student: StudentData) => {
+							const studentDisplay = getStudentData(student);
+							if (isEmpty(studentDisplay)) return <></>;
 
-								return (
-									<TableRow key={studentDisplay.id} selected={studentDisplay.id === selectedStudent.id}>
-										<TableCell aria-label={studentDisplay.displayName} component='th' scope='row'>
-											{studentDisplay.displayName}
-										</TableCell>
-										<TableCell aria-label={studentDisplay.id.toString()} align='right'>
-											{studentDisplay.id}
-										</TableCell>
-										<TableCell aria-label={studentDisplay.multiplier.toString()} align='right'>
-											{studentDisplay.multiplier}
-										</TableCell>
-									</TableRow>
-								);
-							},
-						)}
+							return (
+								<TableRow
+									key={`${studentDisplay.id}-${studentDisplay.displayName}`}
+									selected={studentDisplay.id === selectedStudent.id}
+								>
+									<TableCell aria-label={studentDisplay.id.toString()} align='left' component='th' scope='row'>
+										{studentDisplay.id}
+									</TableCell>
+									<TableCell aria-label={studentDisplay.displayName} align='center'>
+										{studentDisplay.displayName}
+									</TableCell>
+								</TableRow>
+							);
+						})}
 					</TableBody>
 					<TableFooter>
 						<TableRow>
