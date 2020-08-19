@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback, useEffect } from 'react';
+import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
 	Button,
@@ -25,7 +25,6 @@ import { getProgramStudents, getProgramStudentsLength } from '../../stores/selec
 import { PaginationTableActions } from '../pagination-table';
 
 import { StudentDisplayData } from './interfaces/student-display';
-import { StudentData } from '../../stores/interfaces/student-store';
 
 const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const styles = useStyles();
@@ -38,6 +37,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const rowsPerPage = 10;
 	const nextIndex = studentsStore.selectedIndex + 1;
 	const selectedStudent = getStudentData(students[studentsStore.selectedIndex]);
+	let prevStudentsStore = useRef(studentsStore);
 
 	const onSetSelectedID = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -102,14 +102,28 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 		return;
 	}, [students, setStudentsStore, settingsStore.gs.StudentID, studentsStore.selectedStudentID]);
 
+	const selectTableRow = useCallback(
+		(student: any) => {
+			const studentIdColumn = settingsStore.gs.StudentID;
+			const studentID = student[studentIdColumn];
+
+			if ((studentID === undefined || studentID) == null || studentID < 0) return;
+
+			const idx = findIndex(students, {
+				[studentIdColumn]: studentID,
+			});
+
+			if (idx < 0) return; // Student was not found
+
+			// Student was found in current program
+			setStudentsStore((oldStore) => ({ ...oldStore, selectedIndex: idx }));
+		},
+		[setStudentsStore, settingsStore.gs.StudentID, students],
+	);
+
 	const handleChangePage = useCallback((event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
 		setPage(newPage);
 	}, []);
-
-	useEffect(() => {
-		// Reset the search error anytime the program changes
-		setSearchError('');
-	}, [studentsStore.programName]);
 
 	useEffect(() => {
 		// Make sure we are always on the correct page based on the new selected index
@@ -125,9 +139,13 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	}, [studentsStore.selectedIndex]);
 
 	useEffect(() => {
-		// Program changed so reset page to 9=0
-		setPage(0);
-	}, [studentsStore.programName]);
+		// Program changed so reset page to 0 and reset search error
+		if (prevStudentsStore.current.programName !== studentsStore.programName) {
+			prevStudentsStore.current = studentsStore;
+			setSearchError('');
+			setPage(0);
+		}
+	}, [studentsStore]);
 
 	return (
 		<FormControl component='fieldset' className={styles.formControl}>
@@ -229,7 +247,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((student: StudentData) => {
+						{students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((student: any) => {
 							const studentDisplay = getStudentData(student);
 							if (isEmpty(studentDisplay)) return <></>;
 
@@ -237,6 +255,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 								<TableRow
 									key={`${studentDisplay.id}-${studentDisplay.displayName}`}
 									selected={studentDisplay.id === selectedStudent.id}
+									onDoubleClick={() => selectTableRow(student)}
 								>
 									<TableCell aria-label={studentDisplay.id.toString()} align='left' component='th' scope='row'>
 										{studentDisplay.id}
