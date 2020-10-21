@@ -53,7 +53,10 @@ const Students = () => {
 				gs: { StudentID, Name_Column, Extra_Column, Multiplier_Column },
 			} = settingsStore;
 
-			const _id = isEmpty(StudentID) ? generate() : String(getDataValue(student, StudentID));
+			let _id = isEmpty(StudentID) ? '' : String(getDataValue(student, StudentID));
+			if (_id.length === 0) {
+				_id = generate();
+			}
 
 			const _name =
 				isEmpty(Name) || isEmpty(Name_Column)
