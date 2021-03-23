@@ -659,6 +659,35 @@ const Students = () => {
 		Emitter.emit('conn.updateSettings', settingsStore.network);
 	}, [settingsStore.network]);
 
+	useEffect(() => {
+		if (!isMounted.current) return;
+		// If program or index didn't change, ignore the update
+		if (
+			studentsStore.programName === prevStudentsStore.current.programName &&
+			studentsStore.selectedIndex === prevStudentsStore.current.selectedIndex
+		)
+			return;
+
+		const lastStudent = students[lastIndex];
+		const curStudent = students[studentsStore.selectedIndex];
+		const nextStudent = students[nextIndex];
+
+		Emitter.emit(
+			'conn.sendMessage',
+			JSON.stringify({
+				service: 'spectator',
+				data: {
+					action: 'update',
+					uuid: `spectatorUpdate-${generate()}`,
+					program: studentsStore.programName,
+					last: getStudentData(lastStudent),
+					current: getStudentData(curStudent),
+					next: getStudentData(nextStudent),
+				},
+			}),
+		);
+	}, [getStudentData, lastIndex, nextIndex, students, studentsStore.programName, studentsStore.selectedIndex]);
+
 	if (!settingsStore.loaded)
 		return (
 			<Grid container className={styles.grid} justify='center' spacing={1}>
