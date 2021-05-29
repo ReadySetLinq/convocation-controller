@@ -43,5 +43,7 @@ ws.onmessage = (message) => {
 };
 
 window.onerror = function (error) {
-  window.location.reload();
+  setTimeout(() => {
+    window.location.reload();
+  }, 5000);
 };
