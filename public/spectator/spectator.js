@@ -1,14 +1,15 @@
 "use strict";
 
 // HyperDeck control elements on the HTML page
-let program = document.getElementById("state");
+let program = document.getElementById("program");
 let lastStudent = document.getElementById("last");
 let currentStudent = document.getElementById("current");
 let nextStudent = document.getElementById("next");
 let nextData = {};
+let updateDelay = 300;
 
 // Websocket used to communicate with the Python server backend
-let ws = new WebSocket("ws://" + window.location.host + "/ws");
+let ws = new WebSocket("ws://192.168.86.96:8181");
 
 // Generate a "random" uuid
 const uuidv4 = () => {
@@ -31,47 +32,57 @@ ws.onopen = () => {
   ws.send(JSON.stringify(message));
 };
 
-ws.onclose = (e) => {
+ws.onclose = () => {
   window.location.reload();
 };
 
 // Websocket message parsing
-ws.onmessage = (message) => {
-  const msg = JSON.parse(message);
+ws.onmessage = (wsMessage) => {
+  console.log(wsMessage.data);
+  const msg = JSON.parse(wsMessage.data);
   if (msg.service === undefined || msg.service === null) return;
 
   if (msg.service === "spectator") {
-    const data = JSON.parse(message.data);
-    if (data.action === undefined || data.action === null) return;
+    if (msg.data === undefined || msg.data === null) return;
+    const data = msg.data;
+    const lastData = { ...nextData };
+    nextData = { ...data };
+    console.log("lastData", lastData);
+    console.log("nextData", nextData);
 
-    switch (data.action) {
-      case "update":
-        const lastData = Object.assign({}, nextData);
-        nextData = data;
-        if (
-          lastData.program &&
-          nextData.program &&
-          lastData.program !== nextData.program
-        )
-          program.innerHTML = "";
+    if (
+      Object.entries(lastData).toString() ===
+      Object.entries(nextData).toString()
+    )
+      return;
 
-        lastStudent.innerHTML = "";
-        currentStudent.innerHTML = "";
-        nextStudent.innerHTML = "";
-        setTimeout(() => {
-          program.innerHTML = nextData.program ? nextData.program : "";
-          lastStudent.innerHTML = nextData.last ? nextData.last : "";
-          currentStudent.innerHTML = nextData.current ? nextData.current : "";
-          nextStudent.innerHTML = nextData.next ? nextData.next : "";
-        }, 500);
-        break;
-      default:
-        break;
-    }
+    if (
+      lastData.program &&
+      nextData.program &&
+      lastData.program !== nextData.program
+    )
+      program.innerHTML = "";
+
+    lastStudent.innerHTML = "";
+    currentStudent.innerHTML = "";
+    nextStudent.innerHTML = "";
+    setTimeout(() => {
+      program.innerHTML = nextData.program ? nextData.program : "";
+      lastStudent.innerHTML = nextData.last ? nextData.last : "";
+      currentStudent.innerHTML = nextData.current ? nextData.current : "";
+      nextStudent.innerHTML = nextData.next ? nextData.next : "";
+    }, updateDelay);
   }
 };
 
-window.onerror = function (error) {
+window.onload = () => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  if (urlParams.has("delay")) updateDelay = urlParams.get("delay");
+};
+
+window.onerror = (error) => {
+  console.error(error);
   setTimeout(() => {
     window.location.reload();
   }, 5000);
