@@ -8,6 +8,7 @@ import { settingsState } from '../../stores/atoms';
 import NetworkSettings from './network';
 import XpressionSettings from './xpression';
 import GoogleSheetsSettings from './google-sheets';
+import ImportExportSettings from './import-export'
 import Storage from '../../services/storage';
 import { useStyles } from '../../services/constants/styles';
 import { TabPanel, a11yProps } from '../../views/tab-panel';
@@ -123,7 +124,7 @@ const Settings = () => {
 
 							return (
 								<Form>
-									<Grid item>
+									<Grid item>										
 										<div className={`${styles.tabRoot} && ${styles.fullWidth}`}>
 											<Tabs
 												variant='fullWidth'
@@ -168,6 +169,11 @@ const Settings = () => {
 													}
 													{...a11yProps(2)}
 												/>
+												<Tab
+													disableRipple
+													label={`[Import/Export]`}
+													{...a11yProps(3)}
+												/>
 											</Tabs>
 											<Paper>
 												<TabPanel value={tabIndex} index={0}>
@@ -178,6 +184,9 @@ const Settings = () => {
 												</TabPanel>
 												<TabPanel value={tabIndex} index={2}>
 													<XpressionSettings key={'settings.XpressionSettings'} isSubmitting={isSubmitting} />
+												</TabPanel>
+												<TabPanel value={tabIndex} index={3}>
+													<ImportExportSettings key={'settings.ImportExportSettings'} isSubmitting={isSubmitting} />
 												</TabPanel>
 											</Paper>
 										</div>

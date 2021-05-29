@@ -51,7 +51,7 @@ ws.onmessage = (message) => {
         if (
           lastData.program &&
           nextData.program &&
-          lastData.program != nextData.program
+          lastData.program !== nextData.program
         )
           program.innerHTML = "";
 
