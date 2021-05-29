@@ -96,6 +96,27 @@ const Students = () => {
 		[settingsStore],
 	);
 
+	const updateSpectator = useCallback(() => {		
+		const lastStudent = students[lastIndex];
+		const curStudent = students[studentsStore.selectedIndex];
+		const nextStudent = students[nextIndex];
+
+		Emitter.emit(
+			'conn.sendMessage',
+			JSON.stringify({
+				service: 'spectator',
+				data: {
+					action: 'update',
+					uuid: `spectatorUpdate-${generate()}`,
+					program: studentsStore.programName,
+					last: getStudentData(lastStudent).displayName,
+					current: getStudentData(curStudent).displayName,
+					next: getStudentData(nextStudent).displayName,
+				},
+			}),
+		);
+	}, [getStudentData, lastIndex, nextIndex, students, studentsStore.programName, studentsStore.selectedIndex]);
+
 	const updateStudent = useCallback(
 		(student: any = {}, callback: Function = () => {}) => {
 			if (!isMounted.current) return;
@@ -170,6 +191,9 @@ const Students = () => {
 			uuid: _tmpUUID,
 			takeID: ExtraTakeID,
 		});
+		
+		// Update the spectator data
+		updateSpectator();
 	};
 
 	const takeOnline = (callback: Function = () => {}) => {
@@ -188,6 +212,9 @@ const Students = () => {
 			uuid: _tmpUUID,
 			takeID: TakeID,
 		});
+		
+		// Update the spectator data
+		updateSpectator();
 	};
 
 	const takeExtraOffline = useCallback(
@@ -214,8 +241,11 @@ const Students = () => {
 				uuid: _tmpUUID,
 				takeID: ExtraTakeID,
 			});
+		
+			// Update the spectator data
+			updateSpectator();
 		},
-		[setStudentsStore, settingsStore.xpn],
+		[setStudentsStore, settingsStore.xpn, updateSpectator],
 	);
 
 	const takeOffline = useCallback(
@@ -235,8 +265,11 @@ const Students = () => {
 				uuid: _tmpUUID,
 				takeID: TakeID,
 			});
+		
+			// Update the spectator data
+			updateSpectator();
 		},
-		[setStudentsStore, settingsStore.xpn],
+		[setStudentsStore, settingsStore.xpn, updateSpectator],
 	);
 
 	const resetXPNData = useCallback(
@@ -334,6 +367,7 @@ const Students = () => {
 			gsData(GoogleSheetsID)
 				.then((response: gsObject) => {
 					if (!isMounted.current) return;
+					console.log('gsData', response);
 					let _students: any[] = [];
 					let _programs: string[] = [defaultProgramName];
 
@@ -427,6 +461,9 @@ const Students = () => {
 			if (!isMounted.current) return;
 			const nextIndex = studentsStore.selectedIndex + 1;
 			const maxIndex = studentsLength;
+		
+			// Update the spectator data
+			updateSpectator();
 
 			if (nextIndex < maxIndex) takeStudentOnline(nextIndex);
 			else {
@@ -661,12 +698,6 @@ const Students = () => {
 
 	useEffect(() => {
 		if (!isMounted.current) return;
-		// If program or index didn't change, ignore the update
-		if (
-			studentsStore.programName === prevStudentsStore.current.programName &&
-			studentsStore.selectedIndex === prevStudentsStore.current.selectedIndex
-		)
-			return;
 
 		const lastStudent = students[lastIndex];
 		const curStudent = students[studentsStore.selectedIndex];
