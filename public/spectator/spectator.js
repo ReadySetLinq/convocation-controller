@@ -5,15 +5,30 @@ let program = document.getElementById("state");
 let lastStudent = document.getElementById("last");
 let currentStudent = document.getElementById("current");
 let nextStudent = document.getElementById("next");
+let nextData = {};
 
 // Websocket used to communicate with the Python server backend
 let ws = new WebSocket("ws://" + window.location.host + "/ws");
 
+// Generate a "random" uuid
+uuidv4 = () => {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+};
+
 ws.onopen = () => {
-  const command = {
-    command: "spectator-join",
+  const message = {
+    service: "spectator",
+    data: {
+      action: "join",
+      uuid: `spectatorJoin-${uuidv4()}`,
+    },
   };
-  ws.send(JSON.stringify(command));
+  ws.send(JSON.stringify(message));
 };
 
 ws.onclose = (e) => {
@@ -31,10 +46,24 @@ ws.onmessage = (message) => {
 
     switch (data.action) {
       case "update":
-        program.innerHTML = data.program ? data.program : "";
-        lastStudent.innerHTML = data.last ? data.last : "";
-        currentStudent.innerHTML = data.current ? data.current : "";
-        nextStudent.innerHTML = data.next ? data.next : "";
+        const lastData = Object.assign({}, nextData);
+        nextData = data;
+        if (
+          lastData.program &&
+          nextData.program &&
+          lastData.program != nextData.program
+        )
+          program.innerHTML = "";
+
+        lastStudent.innerHTML = "";
+        currentStudent.innerHTML = "";
+        nextStudent.innerHTML = "";
+        setTimeout(() => {
+          program.innerHTML = nextData.program ? nextData.program : "";
+          lastStudent.innerHTML = nextData.last ? nextData.last : "";
+          currentStudent.innerHTML = nextData.current ? nextData.current : "";
+          nextStudent.innerHTML = nextData.next ? nextData.next : "";
+        }, 500);
         break;
       default:
         break;
