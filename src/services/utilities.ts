@@ -4,7 +4,7 @@ import { transform, isEqual, isObject, isEmpty } from "lodash";
 import { Websockets } from "./websockets";
 import { Connection } from "./connection";
 
-export const corsAnywhere = "https://cors-anywhere.herokuapp.com/";
+export const corsAnywhere = "https://cors.bridged.cc/";
 
 export const createCtx = <ContextType>() => {
   const ctx = createContext<ContextType | undefined>(undefined);

@@ -105,7 +105,7 @@ const Main = () => {
 	if (!themeStore || !settingsStore.loaded) return <LoadingSpinner color='secondary' />;
 
 	return (
-		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper}>
+		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height="100%">
 			<TabContext value={tabIndex}>
 				<AppBar position='static' color='inherit' className={styles.appBar}>
 					<Toolbar>

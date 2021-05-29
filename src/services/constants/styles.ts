@@ -149,10 +149,11 @@ export const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.text.hint,
     },
     boxWrapper: {
+      flexGrow: 1,
       justifyContent: "center",
       margin: -10,
-      height: "100vh",
       width: "100vw",
+      height: "200vh",
     },
     paper: {
       padding: "1em",
@@ -161,7 +162,7 @@ export const useStyles = makeStyles((theme: Theme) =>
       width: "97vw",
     },
     fullWindow: {
-      height: "100vh",
+      height: "200vh",
       width: "100vw",
       outline: "none",
     },
