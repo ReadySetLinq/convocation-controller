@@ -54,7 +54,7 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
   const onExportButtonClick = useCallback(() => {
 		if (!isMounted.current) return;		
 		const fileData = JSON.stringify({			
-			network: settingsStore.network,
+			network: { ...settingsStore.network, password: '' },
 			gs: settingsStore.gs,
 			xpn: settingsStore.xpn,
 		});
