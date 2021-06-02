@@ -409,7 +409,6 @@ const Students = () => {
 			gsData(GoogleSheetsID)
 				.then((response: gsObject) => {
 					if (!isMounted.current) return;
-					console.log('gsData', response);
 					let _students: any[] = [];
 					let _programs: string[] = [defaultProgramName];
 

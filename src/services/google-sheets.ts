@@ -40,8 +40,6 @@ const fetchData = async (id: string) =>
         },
         complete: (results) => {
           const data = { ...results };
-          console.log(results);
-          console.log(data);
           sessionStorage.setItem(
             sessionKey,
             encodeUnicode(JSON.stringify(data))
