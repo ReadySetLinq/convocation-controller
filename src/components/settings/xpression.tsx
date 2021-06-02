@@ -65,6 +65,15 @@ const XpressionSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting =
 				disabled={isSubmitting}
 				component={TextFormField}
 			/>
+
+			<Field
+				name='xpn.Background'
+				id={`Background-${generate()}`}
+				label='Program "Background" property name'
+				placeholder='[Leave empty if not being used]'
+				disabled={isSubmitting}
+				component={TextFormField}
+			/>
 		</Fragment>
 	);
 };

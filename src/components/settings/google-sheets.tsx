@@ -53,6 +53,15 @@ const GoogleSheetsSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 			/>
 
 			<Field
+				name='gs.Division_Column'
+				id={`gs.Division_Column-${generate()}`}
+				label='Program "Division" Column'
+				placeholder='The "Division" column for a students program [If left blank this will not auto-update the background image based on program]'
+				disabled={isSubmitting}
+				component={TextFormField}
+			/>
+
+			<Field
 				name='gs.OrderBy'
 				id={`gs.OrderBy-${generate()}`}
 				label='OrderBy Column'

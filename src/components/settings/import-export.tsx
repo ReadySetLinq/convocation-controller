@@ -33,7 +33,6 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 					}
 					
 					if (fileReader.result !== undefined && fileReader.result !== null) {
-						console.log("jsonResult", fileReader.result);
 						const jsonResult = JSON.parse(fileReader.result);
 						Storage.saveSettings({ ...settingsStore, network: jsonResult?.network, gs: jsonResult?.gs, xpn: jsonResult?.xpn }).then(() => {
 							if (!isMounted.current) return;

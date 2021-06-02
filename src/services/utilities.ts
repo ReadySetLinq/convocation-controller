@@ -98,8 +98,7 @@ export const removeItemAtIndex = (arr: any[], index: number) => {
 };
 
 export const getDataValue = (student: any = {}, column: string = "") => {
-  if (!isEmpty(column) && Object.prototype.hasOwnProperty.call(student, column))
-    return student[column];
+  if (!isEmpty(column) && objHas.call(student, column)) return student[column];
   return "";
 };
 

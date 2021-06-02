@@ -79,8 +79,8 @@ const Students = () => {
 					? `(x${_multiplier}) ${_name}`
 					: _name
 				: _multiplier > 0
-				? `(x${_multiplier}) ${_name}`
-				: _name;
+					? `(x${_multiplier}) ${_name}`
+					: _name;
 
 			const studentData: StudentData = {
 				...defaultStudentData,
@@ -96,7 +96,7 @@ const Students = () => {
 		[settingsStore],
 	);
 
-	const updateSpectator = useCallback(() => {		
+	const updateSpectator = useCallback(() => {
 		const lastStudent = students[lastIndex];
 		const curStudent = students[studentsStore.selectedIndex];
 		const nextStudent = students[nextIndex];
@@ -118,7 +118,7 @@ const Students = () => {
 	}, [getStudentData, lastIndex, nextIndex, students, studentsStore.programName, studentsStore.selectedIndex]);
 
 	const updateStudent = useCallback(
-		(student: any = {}, callback: Function = () => {}) => {
+		(student: any = {}, callback: Function = () => { }) => {
 			if (!isMounted.current) return;
 			const { ExtraTakeID, TakeID, Name, Extra, Multiplier } = settingsStore.xpn;
 			const _student = getStudentData(student);
@@ -155,7 +155,7 @@ const Students = () => {
 		[getStudentData, settingsStore.xpn],
 	);
 
-	const takeExtraOnline = (studentExtra: string = '', callback: Function = () => {}) => {
+	const takeExtraOnline = (studentExtra: string = '', callback: Function = () => { }) => {
 		if (!isMounted.current) return;
 		const { selectedIndex } = studentsStore;
 		const { ExtraTakeID, Extra } = settingsStore.xpn;
@@ -196,7 +196,7 @@ const Students = () => {
 		updateSpectator();
 	};
 
-	const takeOnline = (callback: Function = () => {}) => {
+	const takeOnline = (callback: Function = () => { }) => {
 		if (!isMounted.current) return;
 		const { TakeID } = settingsStore.xpn;
 		const _tmpUUID = `setTakeItemOnline-${generate()}`;
@@ -218,7 +218,7 @@ const Students = () => {
 	};
 
 	const takeExtraOffline = useCallback(
-		(callback: Function = () => {}) => {
+		(callback: Function = () => { }) => {
 			if (!isMounted.current) return;
 			const { ExtraTakeID } = settingsStore.xpn;
 
@@ -249,7 +249,7 @@ const Students = () => {
 	);
 
 	const takeOffline = useCallback(
-		(callback: Function = () => {}) => {
+		(callback: Function = () => { }) => {
 			if (!isMounted.current) return;
 			const { TakeID } = settingsStore.xpn;
 			const _tmpUUID = `setTakeItemOffline-${generate()}`;
@@ -273,9 +273,10 @@ const Students = () => {
 	);
 
 	const resetXPNData = useCallback(
-		(forceOffline: boolean, callback: Function = () => {}) => {
+		(forceOffline: boolean, callback: Function = () => { }) => {
 			if (!isMounted.current) return;
-			const { ExtraTakeID, TakeID, Name, Extra, Multiplier } = settingsStore.xpn;
+			const { ExtraTakeID, TakeID, Name, Extra, Background, Multiplier } = settingsStore.xpn;
+			const { Division_Column } = settingsStore.gs;
 
 			if (forceOffline) {
 				takeOffline();
@@ -314,10 +315,51 @@ const Students = () => {
 					value: '0',
 				});
 			}
+			
+			if (!isEmpty(Background)) {
+				editTakeItemProperty({
+					takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
+					objName: Background,
+					propName: 'Material',
+					value: 0,
+					materialName: `default_background_Image`,
+				});
+
+				if (!isEmpty(students[nextIndex]) && !isEmpty(Background) && !isEmpty(Division_Column) && !isEmpty(students[nextIndex][Division_Column])) {
+					const _tmpUUID = `editTakeItemProperty-${generate()}`;
+					Emitter.once(_tmpUUID, ({ response = false }) => {
+						if (isMounted.current) {
+							// If the background material wasn't found, reset to default
+							if (!response) {
+								editTakeItemProperty({
+									takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
+									objName: Background,
+									propName: 'Material',
+									value: 0,
+									materialName: `default_background_Image`,
+								});
+							};
+						}
+					});
+
+				
+					// Edit the background
+					editTakeItemProperty({
+						uuid: _tmpUUID,
+						takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
+						objName: Background,
+						propName: 'Material',
+						value: 0,
+						materialName: `${students[nextIndex][Division_Column].replace(/[^a-z0-9]+/gi, '-')
+							.replace(/^-+/, '')
+							.replace(/-+$/, '').toLowerCase()}_Image`,
+					});
+				}
+			}
 
 			callback({ forceOffline });
 		},
-		[settingsStore.xpn, takeOffline, takeExtraOffline],
+		[settingsStore.xpn, settingsStore.gs, takeOffline, takeExtraOffline, students, nextIndex],
 	);
 
 	const resetData = useCallback(
@@ -346,7 +388,7 @@ const Students = () => {
 		(forceOffline: boolean = false) => {
 			const {
 				xpn: { Multiplier },
-				gs: { GoogleSheetsID, StudentID, Name_Column, Extra_Column, Multiplier_Column, OrderBy },
+				gs: { GoogleSheetsID, StudentID, Name_Column, Extra_Column, Multiplier_Column, Division_Column, OrderBy },
 			} = settingsStore;
 
 			if (!isMounted.current) return;
@@ -388,12 +430,19 @@ const Students = () => {
 					response.data.forEach((student: any) => {
 						if (!isMounted.current) return;
 						const _studentsProgram = getDataValue(student, Extra_Column);
+						const _studentsDivision = getDataValue(student, Division_Column);
 
 						if (!isEmpty(_studentsProgram)) {
-							if (!_programs.includes(_studentsProgram)) _programs.push(_studentsProgram);
+							if (!_programs.includes(_studentsProgram)) {
+								_programs.push(_studentsProgram);
+							}
 						}
 
-						if (!isEmpty(student[Extra_Column])) student[Extra_Column] = _studentsProgram;
+						if (isEmpty(student[Extra_Column])) student[Extra_Column] = _studentsProgram;
+
+						if (!isEmpty(_studentsDivision)) {
+							if (isEmpty(student[Division_Column])) student[Division_Column] = _studentsDivision;
+						}
 
 						if (!isEmpty(Multiplier) && !isEmpty(Multiplier_Column)) {
 							// Check for people with the same name and get count
@@ -422,6 +471,7 @@ const Students = () => {
 
 							student[Multiplier_Column] = _multiple === 0 ? 0 : _multiple + 1;
 						}
+
 						// Add new student
 						_students.push(student);
 					});
@@ -688,7 +738,7 @@ const Students = () => {
 		setTimeout(() => {
 			resetData(true);
 		}, settingsStore.xpn.tmrDelay * 2);
-	}, [students, resetData, settingsStore.xpn.tmrDelay, studentsStore.programName]);
+	}, [students, nextIndex, resetData, settingsStore.xpn, settingsStore.gs, studentsStore.programName, studentsStore.students]);
 
 	useEffect(() => {
 		if (!isMounted.current) return;
