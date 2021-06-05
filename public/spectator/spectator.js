@@ -1,8 +1,8 @@
 "use strict";
 
 // HyperDeck control elements on the HTML page
+let connMsg = document.getElementById("connMsg");
 let program = document.getElementById("program");
-let lastStudent = document.getElementById("last");
 let currentStudent = document.getElementById("current");
 let nextStudent = document.getElementById("next");
 let nextData = {};
@@ -12,19 +12,34 @@ let connSettings = {
 };
 let updateDelay = 300;
 
+// Generate a "random" uuid
+const uuidv4 = () => {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+};
+
+const setInnerHTML = (element = null, text = "") => {
+  if (element == null) element = document.getElementById("container");
+  element.innerHTML = text.replace(/\([^\)]*?\)/g, "<br />$&");
+};
+
+const setStyledInnerHTML = (element = null, text = "") => {
+  if (element == null) element = document.getElementById("container");
+  element.innerHTML = text.replace(
+    /\([^\)]*?\)/g,
+    '<span class="multiplier">$&</span>'
+  );
+};
+
 const startConnection = () => {
   // Websocket used to communicate with the Python server backend
   let ws = new WebSocket(`ws://${connSettings.ip}:${connSettings.port}`);
-
-  // Generate a "random" uuid
-  const uuidv4 = () => {
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-      (
-        c ^
-        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-      ).toString(16)
-    );
-  };
+  connMsg.className = "";
+  connMsg.innerHTML = "Reconnecting...";
 
   ws.onopen = () => {
     const message = {
@@ -35,10 +50,21 @@ const startConnection = () => {
       },
     };
     ws.send(JSON.stringify(message));
+    connMsg.className = "";
+    connMsg.innerHTML = "";
   };
 
   ws.onclose = () => {
-    window.location.reload();
+    ws = null;
+    connMsg.className = "disconnect";
+    connMsg.innerHTML = "Disconnected...";
+    setTimeout(() => {
+      startConnection();
+    }, 2000);
+  };
+
+  ws.onerror = () => {
+    ws.close();
   };
 
   // Websocket message parsing
@@ -59,10 +85,12 @@ const startConnection = () => {
         return;
 
       setTimeout(() => {
-        program.innerHTML = nextData.program ? nextData.program : "";
-        lastStudent.innerHTML = nextData.last ? nextData.last : "";
-        currentStudent.innerHTML = nextData.current ? nextData.current : "";
-        nextStudent.innerHTML = nextData.next ? nextData.next : "";
+        setInnerHTML(program, nextData.program ? nextData.program : "");
+        setStyledInnerHTML(
+          currentStudent,
+          nextData.current ? nextData.current : ""
+        );
+        setStyledInnerHTML(nextStudent, nextData.next ? nextData.next : "");
       }, updateDelay);
     }
   };
