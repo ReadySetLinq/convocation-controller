@@ -47,7 +47,7 @@ const GoogleSheetsSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 				name='gs.Multiplier_Column'
 				id={`gs.Multiplier_Column-${generate()}`}
 				label='Student "Multiplier" Column'
-				placeholder='The "Multiplier" column for a student [If left blank this will be auto-generated]'
+				placeholder='The "Multiplier" column for a student [If left blank the multiplier system will always display 0]'
 				disabled={isSubmitting}
 				component={TextFormField}
 			/>
