@@ -16,7 +16,7 @@ import LoadingSpinner from '../views/loading-spinner';
 import { StudentDisplay, ProgramsDisplay, OnlineButtonsDisplay } from '../views/students';
 
 // Import Interfaces
-import { StudentData } from '../stores/interfaces/student-store';
+import { StudentData, StudentsStoreState } from '../stores/interfaces/student-store';
 import { editTakeItemProps } from './interface/students';
 import { ConnectionState } from '../services/interfaces/connection';
 import { XPN_TakeItem_Data } from '../services/interfaces/xpn-events';
@@ -182,7 +182,7 @@ const Students = () => {
 
 		Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
 			if (!isMounted.current) return;
-			if (data.response) setStudentsStore((oldStore: any) => ({ ...oldStore, isExtraOnline: true }));
+			if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isExtraOnline: true }));
 			callback({ data });
 		});
 
@@ -203,7 +203,7 @@ const Students = () => {
 
 		Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
 			if (!isMounted.current) return;
-			if (data.response) setStudentsStore((oldStore: any) => ({ ...oldStore, isOnline: true }));
+			if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isOnline: true }));
 			callback({ data });
 		});
 
@@ -232,7 +232,7 @@ const Students = () => {
 
 			Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
 				if (!isMounted.current) return;
-				if (data.response) setStudentsStore((oldStore: any) => ({ ...oldStore, isExtraOnline: false }));
+				if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isExtraOnline: false }));
 				callback(data);
 			});
 
@@ -256,7 +256,7 @@ const Students = () => {
 
 			Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
 				if (!isMounted.current) return;
-				if (data.response) setStudentsStore((oldStore: any) => ({ ...oldStore, isOnline: false }));
+				if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isOnline: false }));
 				callback(data);
 			});
 
@@ -368,7 +368,7 @@ const Students = () => {
 
 			loadStatus.current = Loading.RESETTING_STUDENTS;
 
-			setStudentsStore((oldStore: any) => ({
+			setStudentsStore((oldStore: StudentsStoreState ) => ({
 				...oldStore,
 				switching: false,
 				selectedIndex: -1,
@@ -395,7 +395,7 @@ const Students = () => {
 
 			loadStatus.current = Loading.LOADING_STUDENTS;
 
-			setStudentsStore((oldStore: any) => ({
+			setStudentsStore((oldStore: StudentsStoreState ) => ({
 				...oldStore,
 				isLoading: true,
 				students: [],
@@ -415,7 +415,7 @@ const Students = () => {
 					loadStatus.current = Loading.PROCESSING_STUDENTS;
 
 					if (response.errors.length > 0 || response.meta.aborted) {
-						setStudentsStore((oldStore: any) => ({
+						setStudentsStore((oldStore: StudentsStoreState ) => ({
 							...oldStore,
 							students: [..._students],
 							programs: [..._programs],
@@ -480,7 +480,7 @@ const Students = () => {
 
 					if (!isMounted.current) return;
 
-					setStudentsStore((oldStore: any) => ({
+					setStudentsStore((oldStore: StudentsStoreState ) => ({
 						...oldStore,
 						students: [..._students],
 						programs: [...sortBy(_programs, ['id'])],
@@ -495,7 +495,7 @@ const Students = () => {
 					console.error(e);
 					loadStatus.current = Loading.EMPTY;
 
-					setStudentsStore((oldStore: any) => ({ ...oldStore, isLoading: false }));
+					setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isLoading: false }));
 				});
 		},
 		[resetData, setStudentsStore, settingsStore],
@@ -504,7 +504,7 @@ const Students = () => {
 	const goToNext = () => {
 		if (!isMounted.current) return;
 
-		setStudentsStore((oldStore: any) => ({ ...oldStore, switching: true }));
+		setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, switching: true }));
 
 		takeOffline(() => {
 			if (!isMounted.current) return;
@@ -523,7 +523,7 @@ const Students = () => {
 				if (!studentsStore.isExtraOnline || studentsStore.lastProgram !== _extra) takeExtraOnline(_extra);
 
 				if (!isMounted.current) return;
-				setStudentsStore((oldStore: any) => ({
+				setStudentsStore((oldStore: StudentsStoreState ) => ({
 					...oldStore,
 					switching: false,
 					lastProgram: _extra,
@@ -539,17 +539,17 @@ const Students = () => {
 		const { tmrDelay } = settingsStore.xpn;
 		const _delay = tmrDelay > 4 ? tmrDelay : 4;
 
-		setStudentsStore((oldStore: any) => ({ ...oldStore, switching: true }));
+		setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, switching: true }));
 
 		takeOffline(() => {
 			if (!isMounted.current) return;
 			const lastIndex = studentsStore.selectedIndex - 1;
 			const index = lastIndex >= -1 ? lastIndex : -1;
 
-			setStudentsStore((oldStore: any) => ({ ...oldStore, selectedIndex: index }));
+			setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, selectedIndex: index }));
 			setTimeout(() => {
 				if (!isMounted.current) return;
-				setStudentsStore((oldStore: any) => ({ ...oldStore, switching: false }));
+				setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, switching: false }));
 			}, _delay);
 		});
 	};
@@ -587,7 +587,7 @@ const Students = () => {
 						if (!isMounted.current) return;
 						takeOnline(() => {
 							if (!isMounted.current) return;
-							setStudentsStore((oldStore: any) => ({
+							setStudentsStore((oldStore: StudentsStoreState ) => ({
 								...oldStore,
 								lastProgram: _extra,
 								selectedIndex: index,
@@ -661,7 +661,7 @@ const Students = () => {
 
 		Emitter.on('xpression.loggedIn', () => {
 			if (!isMounted.current) return;
-			setStudentsStore((oldStore: any) => ({ ...oldStore, loggedIn: true }));
+			setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, loggedIn: true }));
 			prevStudentsStore.current = { ...prevStudentsStore.current, loggedIn: true };
 
 			Emitter.emit('xpn.start', { uuid: generate() });
@@ -673,7 +673,7 @@ const Students = () => {
 
 			if (!value.response) {
 				loadStatus.current = Loading.XPN_FAILED;
-				setStudentsStore((oldStore: any) => ({ ...oldStore, ctrlStarted: false, isLoading: true }));
+				setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, ctrlStarted: false, isLoading: true }));
 				setTimeout(() => {
 					if (!isMounted.current) return;
 					connection.disconnect();
@@ -681,7 +681,7 @@ const Students = () => {
 				return;
 			}
 
-			setStudentsStore((oldStore: any) => ({ ...oldStore, ctrlStarted: true }));
+			setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, ctrlStarted: true }));
 
 			if (prevStudentsStore.current.ctrlStarted) {
 				getStudents();
@@ -692,7 +692,7 @@ const Students = () => {
 			if (ExtraTakeID !== -1) {
 				const _tmpExtraUUID = `getTakeItemStatus-${generate()}`;
 				Emitter.once(_tmpExtraUUID, ({ response = false }) => {
-					if (isMounted.current) setStudentsStore((oldStore: any) => ({ ...oldStore, isExtraOnline: response }));
+					if (isMounted.current) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isExtraOnline: response }));
 				});
 
 				Emitter.emit('xpn.GetTakeItemStatus', {
@@ -703,7 +703,7 @@ const Students = () => {
 
 			const _tmpUUID = `getTakeItemStatus-${generate()}`;
 			Emitter.once(_tmpUUID, ({ response = false }) => {
-				if (isMounted.current) setStudentsStore((oldStore: any) => ({ ...oldStore, isOnline: response }));
+				if (isMounted.current) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isOnline: response }));
 			});
 
 			Emitter.emit('xpn.GetTakeItemStatus', {
