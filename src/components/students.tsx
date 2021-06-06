@@ -325,27 +325,9 @@ const Students = () => {
 					materialName: `default_background_Image`,
 				});
 
-				if (!isEmpty(students[nextIndex]) && !isEmpty(Background) && !isEmpty(Division_Column) && !isEmpty(students[nextIndex][Division_Column])) {
-					const _tmpUUID = `editTakeItemProperty-${generate()}`;
-					Emitter.once(_tmpUUID, ({ response = false }) => {
-						if (isMounted.current) {
-							// If the background material wasn't found, reset to default
-							if (!response) {
-								editTakeItemProperty({
-									takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
-									objName: Background,
-									propName: 'Material',
-									value: 0,
-									materialName: `default_background_Image`,
-								});
-							};
-						}
-					});
-
-				
+				if (!isEmpty(students[nextIndex]) && !isEmpty(Background) && !isEmpty(Division_Column) && !isEmpty(students[nextIndex][Division_Column])) {		
 					// Edit the background
 					editTakeItemProperty({
-						uuid: _tmpUUID,
 						takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
 						objName: Background,
 						propName: 'Material',
