@@ -408,10 +408,15 @@ const Students = () => {
 						return;
 					}
 
+					let gs_id = 0;
 					response.data.forEach((student: any) => {
 						if (!isMounted.current) return;
 						const _studentsProgram = getDataValue(student, Extra_Column);
 						const _studentsDivision = getDataValue(student, Division_Column);
+
+						// used to keep the id order of the default GoogleSheets import
+						student["gs_id"] = gs_id;
+						gs_id++;
 
 						if (!isEmpty(_studentsProgram)) {
 							if (!_programs.includes(_studentsProgram)) {
@@ -459,6 +464,7 @@ const Students = () => {
 
 					// OrderBy on our end to make sure its correct as a failsafe
 					if (!isEmpty(OrderBy)) _students = sortBy(_students, [...OrderBy.split(',')]);
+					else _students = sortBy(_students, "gs_id");
 
 					if (!isMounted.current) return;
 
@@ -719,7 +725,7 @@ const Students = () => {
 		setTimeout(() => {
 			resetData(true);
 		}, settingsStore.xpn.tmrDelay * 2);
-	}, [students, nextIndex, resetData, settingsStore.xpn, settingsStore.gs, studentsStore.programName, studentsStore.students]);
+	}, [students, nextIndex, resetData, settingsStore.xpn, settingsStore.gs, studentsStore.programName, studentsStore.students, updateSpectator]);
 
 	useEffect(() => {
 		if (!isMounted.current) return;
@@ -730,25 +736,9 @@ const Students = () => {
 	useEffect(() => {
 		if (!isMounted.current) return;
 
-		const lastStudent = students[lastIndex];
-		const curStudent = students[studentsStore.selectedIndex];
-		const nextStudent = students[nextIndex];
-
-		Emitter.emit(
-			'conn.sendMessage',
-			JSON.stringify({
-				service: 'spectator',
-				data: {
-					action: 'update',
-					uuid: `spectatorUpdate-${generate()}`,
-					program: studentsStore.programName,
-					last: getStudentData(lastStudent).displayName,
-					current: getStudentData(curStudent).displayName,
-					next: getStudentData(nextStudent).displayName,
-				},
-			}),
-		);
-	}, [getStudentData, lastIndex, nextIndex, students, studentsStore.programName, studentsStore.selectedIndex]);
+		// If the students list, program name or selectedIndex change, update our spectator
+		updateSpectator();
+	}, [students, studentsStore.programName, studentsStore.selectedIndex, updateSpectator]);
 
 	if (!settingsStore.loaded)
 		return (
