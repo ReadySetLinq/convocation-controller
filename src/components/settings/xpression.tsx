@@ -74,16 +74,6 @@ const XpressionSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting =
 				disabled={isSubmitting}
 				component={TextFormField}
 			/>
-
-			<Field
-				name='xpn.BackgroundTakeID'
-				id={`BackgroundTakeID-${generate()}`}
-				label='Program Background TakeID'
-				type='number'
-				placeholder='[Set to -1 for no background scene element]'
-				disabled={isSubmitting}
-				component={TextFormField}
-			/>
 		</Fragment>
 	);
 };

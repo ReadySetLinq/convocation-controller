@@ -6,5 +6,4 @@ export interface XpnSettingsData {
   Extra: string;
   Multiplier: string;
   Background: string;
-  BackgroundTakeID: number;
 }

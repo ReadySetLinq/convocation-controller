@@ -9,8 +9,6 @@ import { getProgramStudentsLength } from '../../stores/selectors';
 import { OnlineButtonsDisplayData } from './interfaces/online-buttons-display';
 
 const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
-	backgroundOffline,
-	backgroundOnline,
 	extraOffline,
 	extraOnline,
 	studentOffline,
@@ -18,14 +16,6 @@ const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
 }) => {
 	const studentsStore = useRecoilValue(studentsState);
 	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
-
-	const onBackgroundClick = useCallback(
-		(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-			if (studentsStore.isBackgroundOnline) backgroundOffline();
-			else backgroundOnline();
-		},
-		[studentsStore.isBackgroundOnline, backgroundOffline, backgroundOnline],
-	);
 
 	const onExtraClick = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -45,16 +35,6 @@ const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
 
 	return (
 		<Grid container justify='center' spacing={3}>
-			<Grid item>
-				<Button
-					color={studentsStore.isBackgroundOnline ? 'secondary' : 'primary'}
-					variant='contained'
-					onClick={onBackgroundClick}
-					disabled={studentsStore.switching || studentsLength === 0 ? true : false}
-				>
-					{studentsStore.isBackgroundOnline ? 'Force Background Offline' : 'Force Background Online'}
-				</Button>
-			</Grid>
 			<Grid item>
 				<Button
 					color={studentsStore.isExtraOnline ? 'secondary' : 'primary'}

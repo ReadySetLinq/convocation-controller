@@ -18,7 +18,6 @@ export const defaultStudentsStoreState: StudentsStoreState = {
   ctrlStarted: false,
   isExtraOnline: false,
   isOnline: false,
-  isBackgroundOnline: false,
   students: [],
   programName: defaultProgramName,
   programs: [defaultProgramName],
