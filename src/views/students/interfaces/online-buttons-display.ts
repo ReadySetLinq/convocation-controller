@@ -1,6 +1,8 @@
 export interface OnlineButtonsDisplayData {
-	extraOffline: () => void;
-	extraOnline: () => void;
-	studentOffline: () => void;
-	studentOnline: (index: number) => void;
+  backgroundOffline: () => void;
+  backgroundOnline: () => void;
+  extraOffline: () => void;
+  extraOnline: () => void;
+  studentOffline: () => void;
+  studentOnline: (index: number) => void;
 }

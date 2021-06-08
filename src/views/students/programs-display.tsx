@@ -28,15 +28,12 @@ const ProgramsDisplay = () => {
 			onChange={handleProgramChange}
 			disabled={studentsStore.switching ? true : false}
 		>
-			{studentsStore.programs.map((value: any, index: number) => {
-				const _program = studentsStore.programs[index];
-
-				return (
-					<option key={`programsDisplay-${_program}-${index}`} aria-label={_program} value={_program}>
-						{_program}
+			{studentsStore.programs.map((value: string, index: number) => (
+					<option key={`programsDisplay-${value}-${index}`} aria-label={value} value={value}>
+						{value}
 					</option>
-				);
-			})}
+				))
+			}
 		</NativeSelect>
 	);
 };

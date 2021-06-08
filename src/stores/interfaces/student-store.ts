@@ -12,6 +12,7 @@ export interface StudentsStoreState {
   ctrlStarted: boolean;
   isExtraOnline: boolean;
   isOnline: boolean;
+  isBackgroundOnline: boolean;
   students: any[];
   programName: string;
   programs: string[];

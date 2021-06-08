@@ -10,6 +10,7 @@ export const defaultXpnSettingsData: XpnSettingsData = {
   Extra: "txtOther",
   Multiplier: "txtMultiplier",
   Background: "bkg",
+  BackgroundTakeID: -1,
 };
 
 export const xpnSettingsSchema: yup.ObjectSchema<XpnSettingsData> = yup
@@ -48,5 +49,13 @@ export const xpnSettingsSchema: yup.ObjectSchema<XpnSettingsData> = yup
       .trim()
       .default(defaultXpnSettingsData.Background)
       .defined(),
+    BackgroundTakeID: yup
+      .number()
+      .integer("BackgroundTakeID must be a number!")
+      .min(-1, "BackgroundTakeID must be a -1 or above!")
+      .max(9999, "BackgroundTakeID must be a number less than 10000!")
+      .required(
+        "BackgroundTakeID Required (Set to -1 for no Background scene)!"
+      ),
   })
   .defined();

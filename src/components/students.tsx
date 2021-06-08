@@ -155,6 +155,65 @@ const Students = () => {
 		[getStudentData, settingsStore.xpn],
 	);
 
+	const takeBackgroundOnline = useCallback((callback: Function = () => { }) => {
+		if (!isMounted.current) return;
+		const { selectedIndex } = studentsStore;
+		const { BackgroundTakeID, Background } = settingsStore.xpn;
+		const { Division_Column } = settingsStore.gs;
+
+		// Only take online if ID is greater than or equal to 0, otherwise callback and return
+		if (isEmpty(BackgroundTakeID) || BackgroundTakeID === -1) {
+			callback({ data: {} });
+			return;
+		}
+		
+		// Only take online if we have a background xpn element, otherwise callback and return
+		if (isEmpty(Background)) {
+			callback({ data: {} });
+			return;
+		}
+
+		editTakeItemProperty({
+			takeID: BackgroundTakeID,
+			objName: Background,
+			propName: 'Material',
+			value: 0,
+			materialName: `default_background_Image`,
+		});
+
+		if (isEmpty(students[selectedIndex]) || isEmpty(Division_Column) || isEmpty(students[selectedIndex][Division_Column])) {							
+			callback({ data: {} });
+		}
+		
+		// Edit the background
+		editTakeItemProperty({
+			takeID: BackgroundTakeID,
+			objName: Background,
+			propName: 'Material',
+			value: 0,
+			materialName: `${students[selectedIndex][Division_Column].replace(/[^a-z0-9]+/gi, '-')
+				.replace(/^-+/, '')
+				.replace(/-+$/, '').toLowerCase()}_Image`,
+		});
+		
+		const _tmpUUID = `setTakeItemOnline-${generate()}`;
+
+		Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
+			if (!isMounted.current) return;
+			if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isBackgroundOnline: true }));
+			callback({ data });
+		});
+
+		// Take the text back online
+		Emitter.emit('xpn.SetTakeItemOnline', {
+			uuid: _tmpUUID,
+			takeID: BackgroundTakeID,
+		});
+		
+		// Update the spectator data
+		updateSpectator();
+	}, [setStudentsStore, settingsStore.gs, settingsStore.xpn, students, studentsStore, updateSpectator]);
+
 	const takeExtraOnline = (studentExtra: string = '', callback: Function = () => { }) => {
 		if (!isMounted.current) return;
 		const { selectedIndex } = studentsStore;
@@ -217,13 +276,44 @@ const Students = () => {
 		updateSpectator();
 	};
 
+	const takeBackgroundOffline = useCallback(
+		(callback: Function = () => { }) => {
+			if (!isMounted.current) return;
+			const { BackgroundTakeID } = settingsStore.xpn;
+
+			// Only take offline if ID is not empty or -1, otherwise callback and return
+			if (isEmpty(BackgroundTakeID) || BackgroundTakeID === -1) {
+				callback({});
+				return;
+			}
+
+			const _tmpUUID = `setTakeItemOffline-${generate()}`;
+
+			Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
+				if (!isMounted.current) return;
+				if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isBackgroundOnline: false }));
+				callback(data);
+			});
+
+			// Take the text offline
+			Emitter.emit('xpn.SetTakeItemOffline', {
+				uuid: _tmpUUID,
+				takeID: BackgroundTakeID,
+			});
+		
+			// Update the spectator data
+			updateSpectator();
+		},
+		[setStudentsStore, settingsStore.xpn, updateSpectator],
+	);
+
 	const takeExtraOffline = useCallback(
 		(callback: Function = () => { }) => {
 			if (!isMounted.current) return;
 			const { ExtraTakeID } = settingsStore.xpn;
 
-			// Only take offline if ID is greater than or equal to 0, otherwise callback and return
-			if (ExtraTakeID <= 0) {
+			// Only take offline if ID is not empty or -1, otherwise callback and return
+			if (isEmpty(ExtraTakeID) || ExtraTakeID === -1) {
 				callback({});
 				return;
 			}
@@ -275,12 +365,13 @@ const Students = () => {
 	const resetXPNData = useCallback(
 		(forceOffline: boolean, callback: Function = () => { }) => {
 			if (!isMounted.current) return;
-			const { ExtraTakeID, TakeID, Name, Extra, Background, Multiplier } = settingsStore.xpn;
+			const { ExtraTakeID, TakeID, Name, Extra, Multiplier, Background, BackgroundTakeID } = settingsStore.xpn;
 			const { Division_Column } = settingsStore.gs;
 
 			if (forceOffline) {
 				takeOffline();
 				takeExtraOffline();
+				takeBackgroundOffline();
 			}
 
 			if (!isEmpty(Name)) {
@@ -318,17 +409,17 @@ const Students = () => {
 			
 			if (!isEmpty(Background)) {
 				editTakeItemProperty({
-					takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
+					takeID: (!isEmpty(BackgroundTakeID) && BackgroundTakeID !== -1) ? BackgroundTakeID : (!isEmpty(ExtraTakeID) && ExtraTakeID !== -1) ? ExtraTakeID : TakeID,
 					objName: Background,
 					propName: 'Material',
 					value: 0,
 					materialName: `default_background_Image`,
 				});
 
-				if (!isEmpty(students[nextIndex]) && !isEmpty(Background) && !isEmpty(Division_Column) && !isEmpty(students[nextIndex][Division_Column])) {		
+				if (!isEmpty(students[nextIndex]) && !isEmpty(Division_Column) && !isEmpty(students[nextIndex][Division_Column])) {		
 					// Edit the background
 					editTakeItemProperty({
-						takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
+					takeID: (!isEmpty(BackgroundTakeID) && BackgroundTakeID !== -1) ? BackgroundTakeID : (!isEmpty(ExtraTakeID) && ExtraTakeID !== -1) ? ExtraTakeID : TakeID,
 						objName: Background,
 						propName: 'Material',
 						value: 0,
@@ -341,7 +432,7 @@ const Students = () => {
 
 			callback({ forceOffline });
 		},
-		[settingsStore.xpn, settingsStore.gs, takeOffline, takeExtraOffline, students, nextIndex],
+		[settingsStore.xpn, settingsStore.gs, takeOffline, takeExtraOffline, takeBackgroundOffline, students, nextIndex],
 	);
 
 	const resetData = useCallback(
@@ -508,7 +599,10 @@ const Students = () => {
 				const _studentData = getStudentData(_student);
 				const _extra = _studentData.extra;
 
-				if (!studentsStore.isExtraOnline || studentsStore.lastProgram !== _extra) takeExtraOnline(_extra);
+				if (studentsStore.lastProgram !== _extra) {
+					if (!studentsStore.isBackgroundOnline)	takeBackgroundOnline();
+					if (!studentsStore.isExtraOnline)	takeExtraOnline(_extra);
+				}
 
 				if (!isMounted.current) return;
 				setStudentsStore((oldStore: StudentsStoreState ) => ({
@@ -562,8 +656,11 @@ const Students = () => {
 			let updateDelay = 4;
 
 			if (lastProgram !== _extra) {
-				updateDelay = _delay + 500;
-				takeExtraOnline(_extra);
+				updateDelay = _delay + 750;
+				takeBackgroundOnline();
+				setTimeout(() => {
+					takeExtraOnline(_extra);
+				}, 250);
 			}
 
 			setTimeout(() => {
@@ -657,7 +754,7 @@ const Students = () => {
 
 		Emitter.on('xpression.controllerStarted', (value: { uuid: ''; response: false }) => {
 			if (!isMounted.current) return;
-			const { ExtraTakeID, TakeID } = settingsStore.xpn;
+			const { ExtraTakeID, TakeID, BackgroundTakeID } = settingsStore.xpn;
 
 			if (!value.response) {
 				loadStatus.current = Loading.XPN_FAILED;
@@ -677,7 +774,7 @@ const Students = () => {
 			} else prevStudentsStore.current = { ...prevStudentsStore.current, ctrlStarted: true };
 
 			// Get initial status
-			if (ExtraTakeID !== -1) {
+			if (!isEmpty(ExtraTakeID) && ExtraTakeID !== -1) {
 				const _tmpExtraUUID = `getTakeItemStatus-${generate()}`;
 				Emitter.once(_tmpExtraUUID, ({ response = false }) => {
 					if (isMounted.current) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isExtraOnline: response }));
@@ -686,6 +783,18 @@ const Students = () => {
 				Emitter.emit('xpn.GetTakeItemStatus', {
 					uuid: _tmpExtraUUID,
 					takeID: ExtraTakeID,
+				});
+			}
+
+			if (!isEmpty(BackgroundTakeID) && BackgroundTakeID !== -1) {
+				const _tmpBackgroundUUID = `getTakeItemStatus-${generate()}`;
+				Emitter.once(_tmpBackgroundUUID, ({ response = false }) => {
+					if (isMounted.current) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isBackgroundOnline: response }));
+				});
+
+				Emitter.emit('xpn.GetTakeItemStatus', {
+					uuid: _tmpBackgroundUUID,
+					takeID: BackgroundTakeID,
 				});
 			}
 
@@ -724,8 +833,11 @@ const Students = () => {
 
 		setTimeout(() => {
 			resetData(true);
+			setTimeout(() => {
+				takeBackgroundOnline();
+			}, 250);
 		}, settingsStore.xpn.tmrDelay * 2);
-	}, [students, nextIndex, resetData, settingsStore.xpn, settingsStore.gs, studentsStore.programName, studentsStore.students, updateSpectator]);
+	}, [students, nextIndex, resetData, settingsStore.xpn, settingsStore.gs, studentsStore.programName, studentsStore.students, takeBackgroundOnline]);
 
 	useEffect(() => {
 		if (!isMounted.current) return;
@@ -828,6 +940,8 @@ const Students = () => {
 							<Grid item>
 								<OnlineButtonsDisplay
 									key={'students.OnlineButtonsDisplay'}
+									backgroundOffline={takeBackgroundOffline}
+									backgroundOnline={takeBackgroundOnline}
 									extraOffline={takeExtraOffline}
 									extraOnline={takeExtraOnline}
 									studentOffline={takeOffline}
