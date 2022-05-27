@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { Grid, Button, Paper } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
@@ -33,9 +33,9 @@ const Students = () => {
 	const [studentsStore, setStudentsStore] = useRecoilState(studentsState);
 	const students = useRecoilValue(getProgramStudents(studentsStore.programName));
 	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
-	const lastIndex = studentsStore !== undefined ? studentsStore.selectedIndex - 1 : -1;
-	const nextIndex = studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1;
-	let prevStudentsStore = useRef(studentsStore);
+	const lastIndex = useMemo(() => studentsStore !== undefined ? studentsStore.selectedIndex - 1 : -1, [studentsStore]);
+	const nextIndex = useMemo(() => studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1, [studentsStore]);
+	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
 
@@ -155,48 +155,52 @@ const Students = () => {
 		[getStudentData, settingsStore.xpn],
 	);
 
-	const takeExtraOnline = (studentExtra: string = '', callback: Function = () => { }) => {
-		if (!isMounted.current) return;
-		const { selectedIndex } = studentsStore;
-		const { ExtraTakeID, Extra } = settingsStore.xpn;
-
-		// Only take online if ID is greater than or equal to 0, otherwise callback and return
-		if (ExtraTakeID === -1) {
-			callback({ data: {} });
-			return;
-		}
-
-		if (!isEmpty(Extra)) {
-			if (studentExtra.length === 0) {
-				studentExtra = getStudentData(students[selectedIndex !== -1 ? selectedIndex : 0]).extra;
-			}
-			// Edit their "extra" info
-			editTakeItemProperty({
-				takeID: ExtraTakeID,
-				objName: Extra,
-				value: studentExtra.replace(' (', '\n ('),
-			});
-		}
-
-		const _tmpUUID = `setTakeItemOnline-${generate()}`;
-
-		Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
+	const takeExtraOnline = useCallback(
+		(studentExtra: string = '', callback: Function = () => { }) => {
 			if (!isMounted.current) return;
-			if (data.response) setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, isExtraOnline: true }));
-			callback({ data });
-		});
+			const { selectedIndex } = studentsStore;
+			const { ExtraTakeID, Extra } = settingsStore.xpn;
 
-		// Take the text back online
-		Emitter.emit('xpn.SetTakeItemOnline', {
-			uuid: _tmpUUID,
-			takeID: ExtraTakeID,
-		});
+			// Only take online if ID is greater than or equal to 0, otherwise callback and return
+			if (ExtraTakeID === -1) {
+				callback({ data: {} });
+				return;
+			}
+
+			if (!isEmpty(Extra)) {
+				if (studentExtra.length === 0) {
+					studentExtra = getStudentData(students[selectedIndex !== -1 ? selectedIndex : 0]).extra;
+				}
+				// Edit their "extra" info
+				editTakeItemProperty({
+					takeID: ExtraTakeID,
+					objName: Extra,
+					value: studentExtra.replace(' (', '\n ('),
+				});
+			}
+
+			const _tmpUUID = `setTakeItemOnline-${generate()}`;
+
+			Emitter.once(_tmpUUID, (data: XPN_TakeItem_Data) => {
+				if (!isMounted.current) return;
+				if (data.response) setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, isExtraOnline: true }));
+				callback({ data });
+			});
+
+			// Take the text back online
+			Emitter.emit('xpn.SetTakeItemOnline', {
+				uuid: _tmpUUID,
+				takeID: ExtraTakeID,
+			});
 		
-		// Update the spectator data
-		updateSpectator();
-	};
+			// Update the spectator data
+			updateSpectator();
+		},
+		[getStudentData, setStudentsStore, settingsStore.xpn, students, studentsStore, updateSpectator],
+	);
 
-	const takeOnline = (callback: Function = () => { }) => {
+	const takeOnline = useCallback(
+		(callback: Function = () => { }) => {
 		if (!isMounted.current) return;
 		const { TakeID } = settingsStore.xpn;
 		const _tmpUUID = `setTakeItemOnline-${generate()}`;
@@ -215,7 +219,9 @@ const Students = () => {
 		
 		// Update the spectator data
 		updateSpectator();
-	};
+	},
+		[setStudentsStore, settingsStore.xpn, updateSpectator],
+	);
 
 	const takeExtraOffline = useCallback(
 		(callback: Function = () => { }) => {
@@ -489,146 +495,164 @@ const Students = () => {
 		[resetData, setStudentsStore, settingsStore],
 	);
 
-	const goToNext = () => {
-		if (!isMounted.current) return;
-
-		setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, switching: true }));
-
-		takeOffline(() => {
+	const takeStudentOnline = useCallback(
+		(index: number) => {
 			if (!isMounted.current) return;
-			const nextIndex = studentsStore.selectedIndex + 1;
-			const maxIndex = studentsLength;
-		
-			// Update the spectator data
-			updateSpectator();
+			const { lastProgram } = studentsStore;
+			const { tmrDelay } = settingsStore.xpn;
+			const _delay = tmrDelay > 4 ? tmrDelay : 4;
 
-			if (nextIndex < maxIndex) takeStudentOnline(nextIndex);
-			else {
-				const _student = students[nextIndex];
+			if (index > studentsLength) return;
+
+			const _student = students[index];
+
+			if (_student === undefined || _student === null) return;
+
+			// Wait before taking it back online
+			setTimeout(() => {
+				if (!isMounted.current) return;
 				const _studentData = getStudentData(_student);
 				const _extra = _studentData.extra;
+				let updateDelay = 4;
 
-				if (!studentsStore.isExtraOnline || studentsStore.lastProgram !== _extra) takeExtraOnline(_extra);
+				if (lastProgram !== _extra) {
+					updateDelay = _delay + 500;
+					takeExtraOnline(_extra);
+				}
 
-				if (!isMounted.current) return;
-				setStudentsStore((oldStore: StudentsStoreState ) => ({
-					...oldStore,
-					switching: false,
-					lastProgram: _extra,
-					selectedIndex: nextIndex,
-				}));
-			}
-		});
-	};
-
-	const goToLast = () => {
-		if (!isMounted.current) return;
-
-		const { tmrDelay } = settingsStore.xpn;
-		const _delay = tmrDelay > 4 ? tmrDelay : 4;
-
-		setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, switching: true }));
-
-		takeOffline(() => {
-			if (!isMounted.current) return;
-			const lastIndex = studentsStore.selectedIndex - 1;
-			const index = lastIndex >= -1 ? lastIndex : -1;
-
-			setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, selectedIndex: index }));
-			setTimeout(() => {
-				if (!isMounted.current) return;
-				setStudentsStore((oldStore: StudentsStoreState ) => ({ ...oldStore, switching: false }));
-			}, _delay);
-		});
-	};
-
-	const takeStudentOnline = (index: number) => {
-		if (!isMounted.current) return;
-		const { lastProgram } = studentsStore;
-		const { tmrDelay } = settingsStore.xpn;
-		const _delay = tmrDelay > 4 ? tmrDelay : 4;
-
-		if (index > studentsLength) return;
-
-		const _student = students[index];
-
-		if (_student === undefined || _student === null) return;
-
-		// Wait before taking it back online
-		setTimeout(() => {
-			if (!isMounted.current) return;
-			const _studentData = getStudentData(_student);
-			const _extra = _studentData.extra;
-			let updateDelay = 4;
-
-			if (lastProgram !== _extra) {
-				updateDelay = _delay + 500;
-				takeExtraOnline(_extra);
-			}
-
-			setTimeout(() => {
-				if (!isMounted.current) return;
-				updateStudent(_student, () => {
+				setTimeout(() => {
 					if (!isMounted.current) return;
-					// Wait 250 milliseconds before taking it back online
-					setTimeout(() => {
+					updateStudent(_student, () => {
 						if (!isMounted.current) return;
-						takeOnline(() => {
+						// Wait 250 milliseconds before taking it back online
+						setTimeout(() => {
 							if (!isMounted.current) return;
-							setStudentsStore((oldStore: StudentsStoreState ) => ({
-								...oldStore,
-								lastProgram: _extra,
-								selectedIndex: index,
-								switching: false,
-							}));
-						});
-					}, 250);
-				});
-			}, updateDelay);
-		}, _delay);
-	};
+							takeOnline(() => {
+								if (!isMounted.current) return;
+								setStudentsStore((oldStore: StudentsStoreState) => ({
+									...oldStore,
+									lastProgram: _extra,
+									selectedIndex: index,
+									switching: false,
+								}));
+							});
+						}, 250);
+					});
+				}, updateDelay);
+			}, _delay);
+		},
+		[getStudentData, setStudentsStore, settingsStore.xpn, students, studentsLength, studentsStore, takeExtraOnline, takeOnline, updateStudent],
+	);
 
-	const onResetDataClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-		if (!isMounted.current) return;
+	const goToNext = useCallback(
+		() => {
+			if (!isMounted.current) return;
 
-		resetData();
-	};
+			setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, switching: true }));
 
-	const reloadData = () => {
-		if (!isMounted.current) return;
-		if (connectionState !== undefined && connectionState.connected) {
-			clearGoogleCache(); // Clear the google sheets data cache before loading the students again
-			getStudents();
-		}
-	};
+			takeOffline(() => {
+				if (!isMounted.current) return;
+				const nextIndex = studentsStore.selectedIndex + 1;
+				const maxIndex = studentsLength;
+		
+				// Update the spectator data
+				updateSpectator();
 
-	const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-		if (!isMounted.current) return;
+				if (nextIndex < maxIndex) takeStudentOnline(nextIndex);
+				else {
+					const _student = students[nextIndex];
+					const _studentData = getStudentData(_student);
+					const _extra = _studentData.extra;
 
-		if (connectionState.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
-			if (!event.altKey && !event.shiftKey) {
-				switch (event.key) {
-					case 'ArrowLeft':
-					case '-':
-						event.preventDefault();
-						if (!isMounted.current) break;
+					if (!studentsStore.isExtraOnline || studentsStore.lastProgram !== _extra) takeExtraOnline(_extra);
 
-						if (!studentsStore.switching && studentsStore.selectedIndex - 1 >= -1) goToLast();
-						break;
-					case 'ArrowRight':
-					case '=':
-						event.preventDefault();
-						if (!isMounted.current) break;
+					if (!isMounted.current) return;
+					setStudentsStore((oldStore: StudentsStoreState) => ({
+						...oldStore,
+						switching: false,
+						lastProgram: _extra,
+						selectedIndex: nextIndex,
+					}));
+				}
+			});
+		},
+		[getStudentData, setStudentsStore, students, studentsLength, studentsStore.isExtraOnline, studentsStore.lastProgram, studentsStore.selectedIndex, takeExtraOnline, takeOffline, takeStudentOnline, updateSpectator],
+	);
 
-						if (!studentsStore.switching && studentsLength !== 0 && studentsStore.selectedIndex + 1 <= studentsLength)
-							goToNext();
-						break;
-					default:
-						break;
+	const goToLast = useCallback(
+		() => {
+			if (!isMounted.current) return;
+
+			const { tmrDelay } = settingsStore.xpn;
+			const _delay = tmrDelay > 4 ? tmrDelay : 4;
+
+			setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, switching: true }));
+
+			takeOffline(() => {
+				if (!isMounted.current) return;
+				const lastIndex = studentsStore.selectedIndex - 1;
+				const index = lastIndex >= -1 ? lastIndex : -1;
+
+				setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, selectedIndex: index }));
+				setTimeout(() => {
+					if (!isMounted.current) return;
+					setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, switching: false }));
+				}, _delay);
+			});
+		},
+		[setStudentsStore, settingsStore.xpn, studentsStore.selectedIndex, takeOffline],
+	);
+
+	const onResetDataClick = useCallback(
+		(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+			if (!isMounted.current) return;
+
+			resetData();
+		},
+		[resetData],
+	);
+
+	const reloadData = useCallback(
+		() => {
+			if (!isMounted.current) return;
+			if (connectionState !== undefined && connectionState.connected) {
+				clearGoogleCache(); // Clear the google sheets data cache before loading the students again
+				getStudents();
+			}
+		},
+		[connectionState, getStudents],
+	);
+
+	const onKeyDown = useCallback(
+		(event: React.KeyboardEvent<HTMLDivElement>) => {
+			if (!isMounted.current) return;
+
+			if (connectionState.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
+				if (!event.altKey && !event.shiftKey) {
+					switch (event.key) {
+						case 'ArrowLeft':
+						case '-':
+							event.preventDefault();
+							if (!isMounted.current) break;
+
+							if (!studentsStore.switching && studentsStore.selectedIndex - 1 >= -1) goToLast();
+							break;
+						case 'ArrowRight':
+						case '=':
+							event.preventDefault();
+							if (!isMounted.current) break;
+
+							if (!studentsStore.switching && studentsLength !== 0 && studentsStore.selectedIndex + 1 <= studentsLength)
+								goToNext();
+							break;
+						default:
+							break;
+					}
 				}
 			}
-		}
-	};
+		},
+		[connectionState.connected, goToLast, goToNext, studentsLength, studentsStore.ctrlStarted, studentsStore.loggedIn, studentsStore.selectedIndex, studentsStore.switching],
+	);
 
 	useEffect(() => {
 		isMounted.current = true;

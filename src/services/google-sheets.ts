@@ -1,13 +1,13 @@
 import Papa from "papaparse";
 
-import { corsAnywhere, decodeUnicode, encodeUnicode } from "./utilities";
+import { corsAllOrigins, decodeUnicode, encodeUnicode } from "./utilities";
 
 import { gsObject } from "./interfaces/google-sheets";
 
 import { defaultSheetsResponse, sessionKey } from "./constants/google-sheets";
 
 export const getUrl = (id: string) =>
-  `${corsAnywhere}https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv`;
+  `${corsAllOrigins}https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv`;
 
 export const clearGoogleCache = () => {
   sessionStorage.removeItem(sessionKey);

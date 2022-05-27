@@ -7,22 +7,25 @@ import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
 import Brightness6 from '@material-ui/icons/Brightness6';
 import Brightness7 from '@material-ui/icons/Brightness7';
 
+import { themeState, settingsState } from '../stores/atoms';
+
 import Emitter from '../services/emitter';
-import Settings from './settings/settings';
 import Storage from '../services/storage';
 import { connection } from '../services/utilities';
-import { themeState, settingsState } from '../stores/atoms';
 import { useStyles } from '../services/constants/styles';
+import { StorageLoad } from '../services/interfaces/storage';
+import { defaultSettingKeys } from '../services/constants/storage';
+
 import Students from './students';
+import Settings from './settings/settings';
+
 import LoadingSpinner from '../views/loading-spinner';
 
 import { ThemeTypesData } from '../stores/interfaces/theme-store';
 import { SettingsStoreState } from './settings/interfaces/settings';
 import { MainState } from './interface/main';
-import { StorageLoad } from '../services/interfaces/storage';
 
 import { initialMainState } from './constants/main';
-import { defaultSettingKeys } from '../services/constants/storage';
 
 const Main = () => {
 	const styles = useStyles();

@@ -1,8 +1,9 @@
 {
   "name": "convocation-controller",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A simple client controller for managing name readings for post-secondary convocations.",
   "scripts": {
+    "serve": "serve -s build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

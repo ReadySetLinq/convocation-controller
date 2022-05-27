@@ -5,6 +5,7 @@ import { Websockets } from "./websockets";
 import { Connection } from "./connection";
 
 export const corsAnywhere = "https://cors.bridged.cc/";
+export const corsAllOrigins = "https://api.allorigins.win/raw?url=";
 
 export const createCtx = <ContextType>() => {
   const ctx = createContext<ContextType | undefined>(undefined);
