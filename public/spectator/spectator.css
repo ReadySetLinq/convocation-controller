@@ -1,9 +1,3 @@
-@font-face {
-  font-family: "Avenir";
-  /* src fallbacks ommitted for brevity */
-  font-weight: normal;
-  font-style: normal;
-}
 
 body {
   background-color: rgb(42, 46, 51);
