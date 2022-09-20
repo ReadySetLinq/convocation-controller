@@ -1,67 +1,69 @@
 {
-  "name": "convocation-controller",
-  "version": "2.1.0",
-  "description": "A simple client controller for managing name readings for post-secondary convocations.",
-  "scripts": {
-    "serve": "serve -s build",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ReadySetLinq/convocation-controller.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ReadySetLinq/convocation-controller/issues"
-  },
-  "__homepage": "https://github.com/ReadySetLinq/convocation-controller#readme",
-  "devDependencies": {
-    "@types/events": "^3.0.0",
-    "@types/jest": "^26.0.0",
-    "@types/lodash": "^4.14.156",
-    "@types/material-ui": "^0.21.7",
-    "@types/node": "^14.0.13",
-    "@types/papaparse": "^5.0.4",
-    "@types/react": "^16.9.38",
-    "@types/react-dom": "^16.9.8",
-    "@types/shortid": "0.0.29",
-    "@types/ws": "^7.2.6",
-    "@types/yup": "^0.29.3"
-  },
-  "dependencies": {
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.56",
-    "eventemitter3": "^4.0.4",
-    "formik": "^2.1.4",
-    "lodash": "^4.17.15",
-    "papaparse": "^5.2.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "^3.4.1",
-    "recoil": "^0.0.10",
-    "shortid": "^2.2.15",
-    "typescript": "^3.9.5",
-    "yup": "^0.29.1"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+	"name": "convocation-controller",
+	"version": "2.1.1",
+	"description": "A simple client controller for managing name readings for post-secondary convocations.",
+	"scripts": {
+		"serve": "serve -s build",
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"rail-build": "npm i && react-scripts build",
+		"rail-start": "npm i && react-scripts start"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ReadySetLinq/convocation-controller.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/ReadySetLinq/convocation-controller/issues"
+	},
+	"__homepage": "https://github.com/ReadySetLinq/convocation-controller#readme",
+	"devDependencies": {
+		"@types/events": "^3.0.0",
+		"@types/jest": "^26.0.0",
+		"@types/lodash": "^4.14.156",
+		"@types/material-ui": "^0.21.7",
+		"@types/node": "^14.0.13",
+		"@types/papaparse": "^5.0.4",
+		"@types/react": "^16.9.38",
+		"@types/react-dom": "^16.9.8",
+		"@types/shortid": "0.0.29",
+		"@types/ws": "^7.2.6",
+		"@types/yup": "^0.29.3"
+	},
+	"dependencies": {
+		"@material-ui/core": "^4.11.0",
+		"@material-ui/icons": "^4.9.1",
+		"@material-ui/lab": "^4.0.0-alpha.56",
+		"eventemitter3": "^4.0.4",
+		"formik": "^2.1.4",
+		"lodash": "^4.17.15",
+		"papaparse": "^5.2.0",
+		"react": "^16.13.1",
+		"react-dom": "^16.13.1",
+		"react-scripts": "^3.4.1",
+		"recoil": "^0.0.10",
+		"shortid": "^2.2.15",
+		"typescript": "^3.9.5",
+		"yup": "^0.29.1"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	}
 }
