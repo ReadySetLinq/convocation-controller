@@ -8,8 +8,9 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
-		"rail-build": "npm i && react-scripts build",
-		"rail-start": "npm i && react-scripts start"
+		"sh-build": "build.sh",
+		"rail-build": "npm i && react-scripts build && sh-build",
+		"rail-start": "npm i && sh-build && react-scripts start"
 	},
 	"repository": {
 		"type": "git",
