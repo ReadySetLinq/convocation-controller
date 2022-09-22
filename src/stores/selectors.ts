@@ -17,7 +17,8 @@ export const studentsFromProgram = selectorFamily({
       const { Extra_Column } = get(settingsState).gs;
 
       if (students.length === 0) return [];
-      if (Extra_Column.trim().length === 0) return [];
+      if (Extra_Column === undefined || Extra_Column.trim().length === 0)
+        return [];
 
       return filter(students, (student) => {
         return isEqual(
@@ -43,7 +44,8 @@ export const getProgramStudents = selectorFamily({
 
       if (isEmpty(filteredStudents)) return [];
       //if (isEmpty(OrderBy)) return filteredStudents;
-      if (isEmpty(OrderBy)) return sortBy(filteredStudents, "gs_id");
+      if (isEmpty(OrderBy) || OrderBy === undefined)
+        return sortBy(filteredStudents, "gs_id");
 
       return sortBy(filteredStudents, OrderBy.split(","));
     },

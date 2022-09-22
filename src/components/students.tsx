@@ -331,7 +331,7 @@ const Students = () => {
 					materialName: `default_background_Image`,
 				});
 
-				if (!isEmpty(students[nextIndex]) && !isEmpty(Background) && !isEmpty(Division_Column) && !isEmpty(students[nextIndex][Division_Column])) {		
+				if (!isEmpty(students[nextIndex]) && !isEmpty(Background) && !isEmpty(Division_Column) && Division_Column !== undefined && !isEmpty(students[nextIndex][Division_Column])) {		
 					// Edit the background
 					editTakeItemProperty({
 						takeID: ExtraTakeID !== -1 ? ExtraTakeID : TakeID,
@@ -430,9 +430,11 @@ const Students = () => {
 							}
 						}
 
-						if (isEmpty(student[Extra_Column])) student[Extra_Column] = _studentsProgram;
+						if (Extra_Column !== undefined) {
+							if (isEmpty(student[Extra_Column])) student[Extra_Column] = _studentsProgram;
+						}
 
-						if (!isEmpty(_studentsDivision)) {
+						if (!isEmpty(_studentsDivision) && Division_Column !== undefined) {
 							if (isEmpty(student[Division_Column])) student[Division_Column] = _studentsDivision;
 						}
 
@@ -448,7 +450,7 @@ const Students = () => {
 								);
 							}).length;
 
-							if (_multiple === 1) {
+							if (_multiple === 1 && Multiplier_Column !== undefined) {
 								// If this is the first duplicate, add multiplier 1 to the original name
 								const _idx = findIndex(_students, (s: any) => {
 									return (
@@ -461,7 +463,8 @@ const Students = () => {
 								if (_idx !== -1 && _students[_idx]) _students[_idx][Multiplier_Column] = 1;
 							}
 
-							student[Multiplier_Column] = _multiple === 0 ? 0 : _multiple + 1;
+							if (Multiplier_Column !== undefined)
+								student[Multiplier_Column] = _multiple === 0 ? 0 : _multiple + 1;
 						}
 
 						// Add new student
@@ -469,7 +472,7 @@ const Students = () => {
 					});
 
 					// OrderBy on our end to make sure its correct as a failsafe
-					if (!isEmpty(OrderBy)) _students = sortBy(_students, [...OrderBy.split(',')]);
+					if (!isEmpty(OrderBy) && OrderBy !== undefined) _students = sortBy(_students, [...OrderBy.split(',')]);
 					else _students = sortBy(_students, "gs_id");
 
 					if (!isMounted.current) return;
