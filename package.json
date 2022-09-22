@@ -22,6 +22,7 @@
 	"bugs": {
 		"url": "https://github.com/ReadySetLinq/convocation-controller/issues"
 	},
+	"homepage": "./",
 	"__homepage": "https://github.com/ReadySetLinq/convocation-controller#readme",
 	"devDependencies": {
 		"@types/events": "^3.0.0",
