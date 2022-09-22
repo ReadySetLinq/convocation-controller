@@ -270,6 +270,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 					<TableFooter>
 						<TableRow>
 							<TablePagination
+								component="div"
 								rowsPerPageOptions={[10]}
 								colSpan={3}
 								count={studentsLength}
