@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import { useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
 import { Box, AppBar, Toolbar, Tab } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -30,8 +30,8 @@ import { initialMainState } from './constants/main';
 const Main = () => {
 	const styles = useStyles();
 	const [state, setState] = useState<MainState>(initialMainState);
-	const [settingsStore, setSettingsStore] = useRecoilState(settingsState);
-	const [themeStore, setThemeStore] = useRecoilState(themeState);
+	const [settingsStore, setSettingsStore] = useAtom(settingsState);
+	const [themeStore, setThemeStore] = useAtom(themeState);
 	const [tabIndex, setTabIndex] = useState<string>('settings');
 	const themeToggleLabel = themeStore.theme === 'light' ? 'Enable Dark Theme' : 'Enable Light Theme';
 	const themeToggleButton =

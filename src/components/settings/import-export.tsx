@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useRef, useEffect, memo } from "react";
-import { useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
 import { Grid, Divider, Button } from '@material-ui/core';
 import BackupIcon from '@material-ui/icons/Backup';
 import SaveIcon from '@material-ui/icons/Save';
@@ -11,7 +11,7 @@ import { useStyles } from '../../services/constants/styles';
 import LoadingSpinner from '../../views/loading-spinner';
 
 const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting = false }) => {
-	const [settingsStore, setSettingsStore] = useRecoilState(settingsState);
+	const [settingsStore, setSettingsStore] = useAtom(settingsState);
 	const [status, setStatus] = useState<string>("");
   const inputImport = useRef<HTMLInputElement>(null);  
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading

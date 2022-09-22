@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useMemo, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils';
 import { Grid, Button, Paper } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { isEqual, isEmpty, sortBy, filter, findIndex } from 'lodash';
@@ -28,11 +29,11 @@ import { defaultProgramName, defaultStudentData } from '../stores/constants/stud
 
 const Students = () => {
 	const styles = useStyles();
-	const settingsStore = useRecoilValue(settingsState);
+	const [studentsStore, setStudentsStore] = useAtom(studentsState);
 	const [connectionState, setConnectionState] = useState<ConnectionState>(defaultConnectionState);
-	const [studentsStore, setStudentsStore] = useRecoilState(studentsState);
-	const students = useRecoilValue(getProgramStudents(studentsStore.programName));
-	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
+	const settingsStore = useAtomValue(settingsState);
+	const students = useAtomValue(getProgramStudents(studentsStore.programName));
+	const studentsLength = useAtomValue(getProgramStudentsLength(studentsStore.programName));
 	const lastIndex = useMemo(() => studentsStore !== undefined ? studentsStore.selectedIndex - 1 : -1, [studentsStore]);
 	const nextIndex = useMemo(() => studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1, [studentsStore]);
 	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);

@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
-import { useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
 import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { isEqual } from 'lodash';
@@ -23,7 +23,7 @@ import { clearGoogleCache } from '../../services/google-sheets';
 
 const Settings = () => {
 	const styles = useStyles();
-	const [settingsStore, setSettingsStore] = useRecoilState(settingsState);
+	const [settingsStore, setSettingsStore] = useAtom(settingsState);
 	const initialSettings: SettingsState = {
 		network: settingsStore.network,
 		gs: settingsStore.gs,

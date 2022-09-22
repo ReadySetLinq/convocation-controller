@@ -1,14 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RecoilRoot } from 'recoil';
+import { Provider } from 'jotai';
 
 import App from './components/app';
 
 const Index = () => {
 	return (
-		<RecoilRoot>
+		<Provider>
 			<App />
-		</RecoilRoot>
+		</Provider>
 	);
 };
 

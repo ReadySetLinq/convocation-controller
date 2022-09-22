@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { useRecoilState } from 'recoil';
+import { useAtom } from 'jotai';
 import { isEqual } from 'lodash';
 import { NativeSelect } from '@material-ui/core';
 import { generate } from 'shortid';
@@ -7,7 +7,7 @@ import { generate } from 'shortid';
 import { studentsState } from '../../stores/atoms';
 
 const ProgramsDisplay = () => {
-	const [studentsStore, setStudentsStore] = useRecoilState(studentsState);
+	const [studentsStore, setStudentsStore] = useAtom(studentsState);
 
 	const handleProgramChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
 		const programName = event.currentTarget.value;

@@ -1,4 +1,6 @@
-import { selectorFamily } from "recoil";
+import { atom } from "jotai";
+import { atomFamily } from "jotai/utils";
+
 import { sortBy, isEqual, isEmpty, filter } from "lodash";
 
 import { settingsState, studentsState } from "./atoms";
@@ -7,59 +9,50 @@ import { getDataValue } from "../services/utilities";
 import { defaultProgramName } from "./constants/student-store";
 
 // Students
-export const studentsFromProgram = selectorFamily({
-  key: "studentsFromProgram",
-  get:
-    (program) =>
-    ({ get }) => {
-      const programName: string = program ? program.toString() : "";
-      const { students } = get(studentsState);
-      const { Extra_Column } = get(settingsState).gs;
+export const studentsFromProgram = atomFamily((program?: string) =>
+  atom((get) => {
+    const programName: string = program ? program.toString() : "";
+    const { students } = get(studentsState);
+    const { Extra_Column } = get(settingsState).gs;
 
-      if (students.length === 0) return [];
-      if (Extra_Column === undefined || Extra_Column.trim().length === 0)
-        return [];
+    if (students.length === 0) return [];
+    if (Extra_Column === undefined || Extra_Column.trim().length === 0)
+      return [];
 
-      return filter(students, (student) => {
-        return isEqual(
-          programName?.toString(),
-          getDataValue(student, Extra_Column)
-        );
-      });
-    },
-});
+    return filter(students, (student) => {
+      return isEqual(
+        programName?.toString(),
+        getDataValue(student, Extra_Column)
+      );
+    });
+  })
+);
 
-export const getProgramStudents = selectorFamily({
-  key: "getProgramStudents",
-  get:
-    (program) =>
-    ({ get }) => {
-      const programName = program?.toString().trim();
-      const { OrderBy } = get(settingsState).gs;
+export const getProgramStudents = atomFamily((program?: string) =>
+  atom((get) => {
+    const programName = program?.toString().trim();
+    const { OrderBy } = get(settingsState).gs;
 
-      if (programName === undefined || programName.length === 0) return [];
-      if (isEqual(programName, defaultProgramName)) return [];
+    if (programName === undefined || programName.length === 0) return [];
+    if (isEqual(programName, defaultProgramName)) return [];
 
-      const filteredStudents = get(studentsFromProgram(programName));
+    const filteredStudents = get(studentsFromProgram(programName));
 
-      if (isEmpty(filteredStudents)) return [];
-      //if (isEmpty(OrderBy)) return filteredStudents;
-      if (isEmpty(OrderBy) || OrderBy === undefined)
-        return sortBy(filteredStudents, "gs_id");
+    if (isEmpty(filteredStudents)) return [];
+    //if (isEmpty(OrderBy)) return filteredStudents;
+    if (isEmpty(OrderBy) || OrderBy === undefined)
+      return sortBy(filteredStudents, "gs_id");
 
-      return sortBy(filteredStudents, OrderBy.split(","));
-    },
-});
+    return sortBy(filteredStudents, OrderBy.split(","));
+  })
+);
 
-export const getProgramStudentsLength = selectorFamily({
-  key: "getProgramStudentsLength",
-  get:
-    (program) =>
-    ({ get }) => {
-      const programName = program?.toString().trim();
+export const getProgramStudentsLength = atomFamily((program?: string) =>
+  atom((get) => {
+    const programName = program?.toString().trim();
 
-      if (programName === undefined) return 0;
+    if (programName === undefined) return 0;
 
-      return get(studentsFromProgram(programName)).length;
-    },
-});
+    return get(studentsFromProgram(programName)).length;
+  })
+);

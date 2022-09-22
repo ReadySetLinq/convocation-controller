@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useAtomValue } from 'jotai/utils';
 import { Grid, Button } from '@material-ui/core';
 import { isEqual } from 'lodash';
 
@@ -14,8 +14,8 @@ const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
 	studentOffline,
 	studentOnline,
 }) => {
-	const studentsStore = useRecoilValue(studentsState);
-	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
+	const studentsStore = useAtomValue(studentsState);
+	const studentsLength = useAtomValue(getProgramStudentsLength(studentsStore.programName));
 
 	const onExtraClick = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

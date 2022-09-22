@@ -1,5 +1,6 @@
 import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useAtom } from 'jotai';
+import { useAtomValue } from 'jotai/utils'
 import {
 	Button,
 	FormControl,
@@ -28,10 +29,10 @@ import { StudentDisplayData } from './interfaces/student-display';
 
 const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const styles = useStyles();
-	const settingsStore = useRecoilValue(settingsState);
-	const [studentsStore, setStudentsStore] = useRecoilState(studentsState);
-	const students = useRecoilValue(getProgramStudents(studentsStore.programName));
-	const studentsLength = useRecoilValue(getProgramStudentsLength(studentsStore.programName));
+	const [studentsStore, setStudentsStore] = useAtom(studentsState);
+	const settingsStore = useAtomValue(settingsState);
+	const students = useAtomValue(getProgramStudents(studentsStore.programName));
+	const studentsLength = useAtomValue(getProgramStudentsLength(studentsStore.programName));
 	const [searchError, setSearchError] = useState('');
 	const [page, setPage] = useState(0);
 	const rowsPerPage = 10;

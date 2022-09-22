@@ -42,12 +42,12 @@
 		"@material-ui/lab": "^4.0.0-alpha.56",
 		"eventemitter3": "^4.0.4",
 		"formik": "^2.1.4",
+		"jotai": "^1.8.4",
 		"lodash": "^4.17.15",
 		"papaparse": "^5.2.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
 		"react-scripts": "^3.4.1",
-		"recoil": "^0.0.10",
 		"shortid": "^2.2.15",
 		"typescript": "^3.9.5",
 		"yup": "^0.29.1"
