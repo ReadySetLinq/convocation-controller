@@ -57,9 +57,9 @@ export const loadSettings = async () =>
 
 		await Promise.all([loadNetwork, loadGS, loadXPN]).then((values) => {
 			const [newNetwork, newGS, newXPN] = values;
-			network = { ...network, ...newNetwork };
-			gs = { ...gs, ...newGS };
-			xpn = { ...xpn, ...newXPN };
+			network = { ...network, ...newNetwork } as NetworkSettingsData;
+			gs = { ...gs, ...newGS } as GoogleSheetsSettingsData;
+			xpn = { ...xpn, ...newXPN } as XpnSettingsData;
 
 			return resolve({
 				loaded,
@@ -83,14 +83,14 @@ export const saveSettings = async (data: SettingsStoreState) =>
 		let gs: GoogleSheetsSettingsData = defaultGoogleSheetsSettingsData;
 		let xpn: XpnSettingsData = defaultXpnSettingsData;
 
-		const saveNetwork = saveData(defaultSettingKeys.Network, data.network)
+		const saveNetwork = saveData(defaultSettingKeys.Network, data.network as NetworkSettingsData)
 			.then((x: StorageSave) => {
 				if (x.data !== undefined) return x.data;
 				throw new Error('data undefined');
 			})
 			.catch(() => data.network);
 
-		const saveGS = saveData(defaultSettingKeys.GS, data.gs)
+		const saveGS = saveData(defaultSettingKeys.GS, data.gs as GoogleSheetsSettingsData)
 			.then((x: StorageSave) => {
 				if (x.data !== undefined) {
 					clearGoogleCache(); // Something in GS settings changed so clear the cache
@@ -100,7 +100,7 @@ export const saveSettings = async (data: SettingsStoreState) =>
 			})
 			.catch(() => data.gs);
 
-		const saveXPN = saveData(defaultSettingKeys.XPN, data.xpn)
+		const saveXPN = saveData(defaultSettingKeys.XPN, data.xpn as XpnSettingsData)
 			.then((x: StorageSave) => {
 				if (x.data !== undefined) return x.data;
 				throw new Error('data undefined');
@@ -109,9 +109,9 @@ export const saveSettings = async (data: SettingsStoreState) =>
 
 		await Promise.allSettled([saveNetwork, saveGS, saveXPN]).then((values) => {
 			const [newNetwork, newGS, newXPN] = values;
-			network = { ...network, ...newNetwork };
-			gs = { ...gs, ...newGS };
-			xpn = { ...xpn, ...newXPN };
+			network = { ...network, ...newNetwork } as NetworkSettingsData;
+			gs = { ...gs, ...newGS } as GoogleSheetsSettingsData;
+			xpn = { ...xpn, ...newXPN } as XpnSettingsData;
 
 			return resolve({
 				loaded,

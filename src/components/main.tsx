@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense, useMemo } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Box, AppBar, Toolbar, Tab } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
@@ -10,6 +10,7 @@ import Brightness7 from '@material-ui/icons/Brightness7';
 import { themeState } from '../stores/atoms';
 import {
 	loadedSettings,
+	googleSheetsSettings,
 	setLoadedSettings,
 	setGoogleSheetsSettings,
 	setNetworkSettings,
@@ -21,6 +22,7 @@ import Storage from '../services/storage';
 import { useStyles } from '../services/constants/styles';
 import { StorageLoad } from '../services/interfaces/storage';
 import { defaultSettingKeys } from '../services/constants/storage';
+import { gsData } from '../services/google-sheets';
 
 import Students from './students';
 import Settings from './settings/settings';
@@ -30,6 +32,7 @@ import LoadingSpinner from '../views/loading-spinner';
 import { ThemeTypesData } from '../stores/interfaces/theme-store';
 import { SettingsStoreState } from './settings/interfaces/settings';
 import { MainState } from './interface/main';
+import { gsObject } from '../services/interfaces/google-sheets';
 
 import { initialMainState } from './constants/main';
 
@@ -37,12 +40,17 @@ const Main = () => {
 	const styles = useStyles();
 	const [state, setState] = useState<MainState>(initialMainState);
 	const isSettingsLoaded = useAtomValue(loadedSettings);
+	const googleSheetsStore = useAtomValue(googleSheetsSettings);
 	const setGoogleSheetsStore = useSetAtom(setGoogleSheetsSettings);
 	const setXPNStore = useSetAtom(setXPNSettings);
 	const setNetworkStore = useSetAtom(setNetworkSettings);
 	const setLoadedStore = useSetAtom(setLoadedSettings);
 	const [themeStore, setThemeStore] = useAtom(themeState);
 	const [tabIndex, setTabIndex] = useState<string>('settings');
+	const googleSheetsData = useMemo(
+		() => gsData(googleSheetsStore.GoogleSheetsID, googleSheetsStore.API_Key),
+		[googleSheetsStore],
+	);
 	const themeToggleLabel = themeStore.theme === 'light' ? 'Enable Dark Theme' : 'Enable Light Theme';
 	const themeToggleButton =
 		themeStore.theme === 'light' ? (
@@ -96,6 +104,13 @@ const Main = () => {
 				if (!e.error || e.error !== 'not found') console.error(e);
 			});
 	}, [setThemeStore, themeStore]);
+
+	useEffect(() => {
+		if (!isMounted.current) return;
+		googleSheetsData.then((response: gsObject) => {
+			console.log(response);
+		});
+	}, [googleSheetsData]);
 
 	useEffect(() => {
 		isMounted.current = true;

@@ -49,6 +49,10 @@ const Students = () => {
 		[studentsStore],
 	);
 	const nextIndex = useMemo(() => (studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1), [studentsStore]);
+	const googleSheetsData = useMemo(
+		() => gsData(googleSheetsStore.GoogleSheetsID, googleSheetsStore.API_Key),
+		[googleSheetsStore],
+	);
 	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
@@ -394,8 +398,7 @@ const Students = () => {
 	const getStudents = useCallback(
 		(forceOffline: boolean = false) => {
 			const { Multiplier } = xpnStore;
-			const { GoogleSheetsID, StudentID, Name_Column, Extra_Column, Multiplier_Column, Division_Column, OrderBy } =
-				googleSheetsStore;
+			const { StudentID, Name_Column, Extra_Column, Multiplier_Column, Division_Column, OrderBy } = googleSheetsStore;
 
 			if (!isMounted.current) return;
 
@@ -412,7 +415,7 @@ const Students = () => {
 				lastProgram: '',
 			}));
 
-			gsData(GoogleSheetsID)
+			googleSheetsData
 				.then((response: gsObject) => {
 					if (!isMounted.current) return;
 					let _students: any[] = [];
@@ -512,7 +515,7 @@ const Students = () => {
 					setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, isLoading: false }));
 				});
 		},
-		[googleSheetsStore, xpnStore, resetData, setStudentsStore],
+		[xpnStore, googleSheetsStore, setStudentsStore, googleSheetsData, resetData],
 	);
 
 	const takeStudentOnline = useCallback(
