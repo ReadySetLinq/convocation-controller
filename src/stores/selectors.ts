@@ -9,6 +9,7 @@ import { defaultProgramName } from './constants/student-store';
 import { GoogleSheetsSettingsData } from '../components/settings/interfaces/google-sheets';
 import { NetworkSettingsData } from '../components/settings/interfaces/network';
 import { XpnSettingsData } from '../components/settings/interfaces/xpression';
+import { StudentsStoreState } from './interfaces/student-store';
 
 // Settings
 export const loadedSettings = atom((get) => get(settingsState).loaded);
@@ -68,3 +69,7 @@ export const getProgramStudents = atom((get) => {
 });
 
 export const getProgramStudentsLength = atom((get) => get(studentsFromProgram).length);
+
+export const setStudentsState = atom(null, (get, set, item: StudentsStoreState) =>
+	set(studentsState, { ...get(studentsState), ...item }),
+);
