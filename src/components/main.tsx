@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Box, AppBar, Toolbar, Tab } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -7,11 +7,17 @@ import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
 import Brightness6 from '@material-ui/icons/Brightness6';
 import Brightness7 from '@material-ui/icons/Brightness7';
 
-import { themeState, settingsState } from '../stores/atoms';
+import { themeState } from '../stores/atoms';
+import {
+	loadedSettings,
+	setLoadedSettings,
+	setGoogleSheetsSettings,
+	setNetworkSettings,
+	setXPNSettings,
+} from '../stores/selectors';
 
 import Emitter from '../services/emitter';
 import Storage from '../services/storage';
-import { connection } from '../services/utilities';
 import { useStyles } from '../services/constants/styles';
 import { StorageLoad } from '../services/interfaces/storage';
 import { defaultSettingKeys } from '../services/constants/storage';
@@ -30,7 +36,11 @@ import { initialMainState } from './constants/main';
 const Main = () => {
 	const styles = useStyles();
 	const [state, setState] = useState<MainState>(initialMainState);
-	const [settingsStore, setSettingsStore] = useAtom(settingsState);
+	const isSettingsLoaded = useAtomValue(loadedSettings);
+	const setGoogleSheetsStore = useSetAtom(setGoogleSheetsSettings);
+	const setXPNStore = useSetAtom(setXPNSettings);
+	const setNetworkStore = useSetAtom(setNetworkSettings);
+	const setLoadedStore = useSetAtom(setLoadedSettings);
 	const [themeStore, setThemeStore] = useAtom(themeState);
 	const [tabIndex, setTabIndex] = useState<string>('settings');
 	const themeToggleLabel = themeStore.theme === 'light' ? 'Enable Dark Theme' : 'Enable Light Theme';
@@ -58,18 +68,22 @@ const Main = () => {
 	);
 
 	const handleLoadData = useCallback(() => {
-		if (!isMounted.current || settingsStore.loaded) return;
+		if (!isMounted.current || isSettingsLoaded) return;
 
 		Storage.loadSettings()
 			.then((response: SettingsStoreState) => {
 				if (!isMounted.current) return;
-				setSettingsStore((oldStore) => ({ ...oldStore, ...response }));
-				connection.updateSettings(response.network);
+				setGoogleSheetsStore(response.gs);
+				setXPNStore(response.xpn);
+				setNetworkStore(response.network);
 			})
 			.catch((e: any) => {
-				if (isMounted.current) setSettingsStore((oldStore) => ({ ...oldStore, loaded: true }));
+				console.error({ ...e });
+			})
+			.finally(() => {
+				if (isMounted.current) setLoadedStore(true);
 			});
-	}, [setSettingsStore, settingsStore.loaded]);
+	}, [setGoogleSheetsStore, setLoadedStore, setNetworkStore, setXPNStore, isSettingsLoaded]);
 
 	const handleLoadTheme = useCallback(() => {
 		if (!isMounted.current || themeStore.loaded) return;
@@ -105,10 +119,10 @@ const Main = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	if (!themeStore || !settingsStore.loaded) return <LoadingSpinner color='secondary' />;
+	if (!themeStore || !isSettingsLoaded) return <LoadingSpinner color='secondary' />;
 
 	return (
-		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height="200vh">
+		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
 			<TabContext value={tabIndex}>
 				<AppBar position='static' color='inherit' className={styles.appBar}>
 					<Toolbar>

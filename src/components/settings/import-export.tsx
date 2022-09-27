@@ -1,17 +1,35 @@
 import React, { useCallback, useState, useRef, useEffect, memo } from 'react';
-import { useAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Grid, Divider, Button } from '@material-ui/core';
 import BackupIcon from '@material-ui/icons/Backup';
 import SaveIcon from '@material-ui/icons/Save';
 import { isEqual } from 'lodash';
 
-import { settingsState } from '../../stores/atoms';
+import {
+	loadedSettings,
+	googleSheetsSettings,
+	networkSettings,
+	xpnSettings,
+	setGoogleSheetsSettings,
+	setNetworkSettings,
+	setXPNSettings,
+} from '../../stores/selectors';
 import Storage from '../../services/storage';
 import { useStyles } from '../../services/constants/styles';
 import LoadingSpinner from '../../views/loading-spinner';
 
+import { GoogleSheetsSettingsData } from './interfaces/google-sheets';
+import { XpnSettingsData } from './interfaces/xpression';
+import { NetworkSettingsData } from './interfaces/network';
+
 const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting = false }) => {
-	const [settingsStore, setSettingsStore] = useAtom(settingsState);
+	const isSettingsLoaded = useAtomValue(loadedSettings);
+	const googleSheetsStore = useAtomValue(googleSheetsSettings);
+	const networkStore = useAtomValue(networkSettings);
+	const xpnStore = useAtomValue(xpnSettings);
+	const setGoogleSheetsStore = useSetAtom(setGoogleSheetsSettings);
+	const setXPNStore = useSetAtom(setXPNSettings);
+	const setNetworkStore = useSetAtom(setNetworkSettings);
 	const [status, setStatus] = useState<string>('');
 	const inputImport = useRef<HTMLInputElement>(null);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
@@ -38,18 +56,15 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 						if (fileReader.result !== undefined && fileReader.result !== null) {
 							const jsonResult = JSON.parse(fileReader.result);
 							Storage.saveSettings({
-								...settingsStore,
-								network: jsonResult?.network,
-								gs: jsonResult?.gs,
-								xpn: jsonResult?.xpn,
+								loaded: isSettingsLoaded,
+								network: (jsonResult.network as NetworkSettingsData) ?? networkStore,
+								gs: (jsonResult?.gs as GoogleSheetsSettingsData) ?? googleSheetsStore,
+								xpn: (jsonResult?.xpn as XpnSettingsData) ?? xpnStore,
 							}).then(() => {
 								if (!isMounted.current) return;
-								setSettingsStore((oldStore) => ({
-									...oldStore,
-									network: jsonResult?.network,
-									gs: jsonResult?.gs,
-									xpn: jsonResult?.xpn,
-								}));
+								if (jsonResult.gs) setGoogleSheetsStore({ ...jsonResult.gs } as GoogleSheetsSettingsData);
+								if (jsonResult.xpn) setXPNStore({ ...jsonResult.xpn } as XpnSettingsData);
+								if (jsonResult.network) setNetworkStore({ ...jsonResult.network } as NetworkSettingsData);
 								window.location.reload();
 							});
 						}
@@ -59,7 +74,7 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 				};
 			}
 		},
-		[settingsStore, setSettingsStore],
+		[isSettingsLoaded, networkStore, googleSheetsStore, xpnStore, setGoogleSheetsStore, setXPNStore, setNetworkStore],
 	);
 
 	const onImportButtonClick = useCallback(() => {
@@ -69,9 +84,9 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 	const onExportButtonClick = useCallback(() => {
 		if (!isMounted.current) return;
 		const fileData = JSON.stringify({
-			network: { ...settingsStore.network, password: '' },
-			gs: settingsStore.gs,
-			xpn: settingsStore.xpn,
+			network: { ...networkStore, password: '' },
+			gs: googleSheetsStore,
+			xpn: xpnStore,
 		});
 		const blob = new Blob([fileData], { type: 'text/plain' });
 		const url = URL.createObjectURL(blob);
@@ -88,7 +103,7 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 			if (!isMounted.current) return;
 			setStatus('');
 		}, 1000);
-	}, [settingsStore]);
+	}, [googleSheetsStore, networkStore, xpnStore]);
 
 	useEffect(() => {
 		isMounted.current = true;

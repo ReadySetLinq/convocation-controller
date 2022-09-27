@@ -1,6 +1,6 @@
 import React, { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils'
+import { useAtomValue } from 'jotai/utils';
 import {
 	Button,
 	FormControl,
@@ -21,8 +21,8 @@ import { isEqual, includes, findIndex, isEmpty } from 'lodash';
 import { generate } from 'shortid';
 
 import { useStyles } from '../../services/constants/styles';
-import { settingsState, studentsState } from '../../stores/atoms';
-import { getProgramStudents, getProgramStudentsLength } from '../../stores/selectors';
+import { studentsState } from '../../stores/atoms';
+import { googleSheetsSettings, getProgramStudents, getProgramStudentsLength } from '../../stores/selectors';
 import { PaginationTableActions } from '../pagination-table';
 
 import { StudentDisplayData } from './interfaces/student-display';
@@ -30,9 +30,9 @@ import { StudentDisplayData } from './interfaces/student-display';
 const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const styles = useStyles();
 	const [studentsStore, setStudentsStore] = useAtom(studentsState);
-	const settingsStore = useAtomValue(settingsState);
-	const students = useAtomValue(getProgramStudents(studentsStore.programName));
-	const studentsLength = useAtomValue(getProgramStudentsLength(studentsStore.programName));
+	const googleSheetsStore = useAtomValue(googleSheetsSettings);
+	const students = useAtomValue(getProgramStudents);
+	const studentsLength = useAtomValue(getProgramStudentsLength);
 	const [searchError, setSearchError] = useState('');
 	const [page, setPage] = useState(0);
 	const rowsPerPage = 10;
@@ -86,7 +86,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	);
 
 	const onSearch = useCallback(() => {
-		const studentIdColumn = settingsStore.gs.StudentID;
+		const studentIdColumn = googleSheetsStore.StudentID;
 		const idx = findIndex(students, {
 			[studentIdColumn]: studentsStore.selectedStudentID,
 		});
@@ -101,11 +101,11 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 		setStudentsStore((oldStore) => ({ ...oldStore, selectedIndex: idx, selectedStudentID: '' }));
 		setSearchError('');
 		return;
-	}, [students, setStudentsStore, settingsStore.gs.StudentID, studentsStore.selectedStudentID]);
+	}, [students, setStudentsStore, googleSheetsStore.StudentID, studentsStore.selectedStudentID]);
 
 	const selectTableRow = useCallback(
 		(student: any) => {
-			const studentIdColumn = settingsStore.gs.StudentID;
+			const studentIdColumn = googleSheetsStore.StudentID;
 			const studentID = student[studentIdColumn];
 
 			if ((studentID === undefined || studentID) == null || studentID < 0) return;
@@ -119,7 +119,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 			// Student was found in current program
 			setStudentsStore((oldStore) => ({ ...oldStore, selectedIndex: idx }));
 		},
-		[setStudentsStore, settingsStore.gs.StudentID, students],
+		[setStudentsStore, googleSheetsStore.StudentID, students],
 	);
 
 	const handleChangePage = useCallback((event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
@@ -271,7 +271,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 					<TableFooter>
 						<TableRow>
 							<TablePagination
-								component="div"
+								component='div'
 								rowsPerPageOptions={[10]}
 								colSpan={3}
 								count={studentsLength}

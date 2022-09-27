@@ -15,7 +15,7 @@ const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
 	studentOnline,
 }) => {
 	const studentsStore = useAtomValue(studentsState);
-	const studentsLength = useAtomValue(getProgramStudentsLength(studentsStore.programName));
+	const studentsLength = useAtomValue(getProgramStudentsLength);
 
 	const onExtraClick = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

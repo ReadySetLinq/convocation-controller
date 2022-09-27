@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAtomValue } from 'jotai/utils'
+import { useAtomValue } from 'jotai/utils';
 import { ThemeProvider } from '@material-ui/core';
 import { themeState } from '../stores/atoms';
 import { lightTheme, darkTheme } from '../services/constants/styles';

@@ -1,14 +1,22 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
-import { useAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { isEqual } from 'lodash';
 
-import { settingsState } from '../../stores/atoms';
+import {
+	loadedSettings,
+	googleSheetsSettings,
+	networkSettings,
+	xpnSettings,
+	setGoogleSheetsSettings,
+	setNetworkSettings,
+	setXPNSettings,
+} from '../../stores/selectors';
 import NetworkSettings from './network';
 import XpressionSettings from './xpression';
 import GoogleSheetsSettings from './google-sheets';
-import ImportExportSettings from './import-export'
+import ImportExportSettings from './import-export';
 import Storage from '../../services/storage';
 import { useStyles } from '../../services/constants/styles';
 import { TabPanel, a11yProps } from '../../views/tab-panel';
@@ -23,14 +31,27 @@ import { clearGoogleCache } from '../../services/google-sheets';
 
 const Settings = () => {
 	const styles = useStyles();
-	const [settingsStore, setSettingsStore] = useAtom(settingsState);
+	const isSettingsLoaded = useAtomValue(loadedSettings);
+	const googleSheetsStore = useAtomValue(googleSheetsSettings);
+	const networkStore = useAtomValue(networkSettings);
+	const xpnStore = useAtomValue(xpnSettings);
+	const setGoogleSheetsStore = useSetAtom(setGoogleSheetsSettings);
+	const setXPNStore = useSetAtom(setXPNSettings);
+	const setNetworkStore = useSetAtom(setNetworkSettings);
 	const initialSettings: SettingsState = {
-		network: settingsStore.network,
-		gs: settingsStore.gs,
-		xpn: settingsStore.xpn,
+		network: networkStore,
+		gs: googleSheetsStore,
+		xpn: xpnStore,
 	};
 	const [tabIndex, setTabIndex] = useState(0);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
+	const hasChanged = useCallback(
+		(values: SettingsState) =>
+			!isEqual(values.gs, googleSheetsStore) ||
+			!isEqual(values.network, networkStore) ||
+			!isEqual(values.xpn, xpnStore),
+		[googleSheetsStore, networkStore, xpnStore],
+	);
 
 	const handleTabChange = useCallback((event: React.ChangeEvent<{}>, newTabIndex: number) => {
 		setTabIndex(newTabIndex);
@@ -42,7 +63,11 @@ const Settings = () => {
 
 			actions.setSubmitting(true);
 
-			if (isEqual(values, settingsStore)) {
+			if (
+				isEqual(values.gs, googleSheetsStore) &&
+				isEqual(values.xpn, xpnStore) &&
+				isEqual(values.network, networkStore)
+			) {
 				actions.setStatus();
 				actions.setSubmitting(false);
 				actions.resetForm({ values });
@@ -51,30 +76,30 @@ const Settings = () => {
 			// Only save if values changed
 			let updatedValues = [];
 
-			if (!isEqual(values.network, settingsStore.network)) {
-				updatedValues.push(
-					Storage.saveData(defaultSettingKeys.Network, values.network).then(() => {
-						if (!isMounted.current) return;
-						setSettingsStore((oldStore) => ({ ...oldStore, network: values.network }));
-					}),
-				);
-			}
-
-			if (!isEqual(values.gs, settingsStore.gs)) {
+			if (!isEqual(values.gs, googleSheetsStore)) {
 				updatedValues.push(
 					Storage.saveData(defaultSettingKeys.GS, values.gs).then(() => {
 						if (!isMounted.current) return;
-						if (!isEqual(values.gs.GoogleSheetsID, settingsStore.gs.GoogleSheetsID)) clearGoogleCache(); // ID changed so clear cached data
-						setSettingsStore((oldStore) => ({ ...oldStore, gs: values.gs }));
+						if (!isEqual(values.gs.GoogleSheetsID, googleSheetsStore.GoogleSheetsID)) clearGoogleCache(); // ID changed so clear cached data
+						setGoogleSheetsStore(values.gs);
 					}),
 				);
 			}
 
-			if (!isEqual(values.xpn, settingsStore.xpn)) {
+			if (!isEqual(values.xpn, xpnStore)) {
 				updatedValues.push(
 					Storage.saveData(defaultSettingKeys.XPN, values.xpn).then(() => {
 						if (!isMounted.current) return;
-						setSettingsStore((oldStore) => ({ ...oldStore, xpn: values.xpn }));
+						setXPNStore(values.xpn);
+					}),
+				);
+			}
+
+			if (!isEqual(values.network, networkStore)) {
+				updatedValues.push(
+					Storage.saveData(defaultSettingKeys.Network, values.network).then(() => {
+						if (!isMounted.current) return;
+						setNetworkStore(values.network);
 					}),
 				);
 			}
@@ -86,7 +111,7 @@ const Settings = () => {
 				actions.resetForm({ values });
 			});
 		},
-		[setSettingsStore, settingsStore],
+		[googleSheetsStore, networkStore, setGoogleSheetsStore, setNetworkStore, setXPNStore, xpnStore],
 	);
 
 	useEffect(() => {
@@ -98,7 +123,7 @@ const Settings = () => {
 		};
 	}, []);
 
-	if (!settingsStore.loaded) return <LoadingSpinner key={'settings.LoadingSpinner'} />;
+	if (!isSettingsLoaded) return <LoadingSpinner key={'settings.LoadingSpinner'} />;
 
 	return (
 		<div className={styles.root}>
@@ -124,7 +149,7 @@ const Settings = () => {
 
 							return (
 								<Form>
-									<Grid item>										
+									<Grid item>
 										<div className={`${styles.tabRoot} && ${styles.fullWidth}`}>
 											<Tabs
 												variant='fullWidth'
@@ -169,11 +194,7 @@ const Settings = () => {
 													}
 													{...a11yProps(2)}
 												/>
-												<Tab
-													disableRipple
-													label={`[Import/Export]`}
-													{...a11yProps(3)}
-												/>
+												<Tab disableRipple label={`[Import/Export]`} {...a11yProps(3)} />
 											</Tabs>
 											<Paper>
 												<TabPanel value={tabIndex} index={0}>
@@ -200,9 +221,9 @@ const Settings = () => {
 												color={!isSubmitting && touched && isValid ? 'primary' : 'secondary'}
 												size='large'
 												type='submit'
-												disabled={!isValid || !dirty || isSubmitting || !touched || isEqual(values, settingsStore)}
+												disabled={!isValid || !dirty || isSubmitting || !touched || !hasChanged(values)}
 											>
-												{isValid && dirty && !isSubmitting && touched && !isEqual(values, settingsStore)
+												{isValid && dirty && !isSubmitting && touched && hasChanged(values)
 													? 'Save Settings'
 													: isSubmitting
 													? 'Saving...'
