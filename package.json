@@ -1,6 +1,6 @@
 {
 	"name": "convocation-controller",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"description": "A simple client controller for managing name readings for post-secondary convocations.",
 	"scripts": {
 		"serve": "serve -s build",
@@ -42,7 +42,6 @@
 		"@material-ui/core": "4.11.0",
 		"@material-ui/icons": "4.9.1",
 		"@material-ui/lab": "4.0.0-alpha.56",
-		"bcrypt": "^5.0.1",
 		"bcryptjs": "^2.4.3",
 		"eventemitter3": "^4.0.4",
 		"formik": "^2.1.4",
