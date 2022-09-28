@@ -25,6 +25,7 @@
 	"homepage": "./",
 	"__homepage": "https://github.com/ReadySetLinq/convocation-controller#readme",
 	"devDependencies": {
+		"@types/bcryptjs": "^2.4.2",
 		"@types/events": "^3.0.0",
 		"@types/jest": "^26.0.0",
 		"@types/lodash": "^4.14.156",
@@ -41,6 +42,8 @@
 		"@material-ui/core": "4.11.0",
 		"@material-ui/icons": "4.9.1",
 		"@material-ui/lab": "4.0.0-alpha.56",
+		"bcrypt": "^5.0.1",
+		"bcryptjs": "^2.4.3",
 		"eventemitter3": "^4.0.4",
 		"formik": "^2.1.4",
 		"jotai": "^1.8.4",

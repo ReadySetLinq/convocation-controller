@@ -6,6 +6,7 @@ export const initialMainState: MainState = {
 	navActiveKey: 'settings',
 };
 
-export const Login = (username: string, password: string) => {
-	return username === 'brtf' && password === 'brtfuser';
+export const credentials = {
+	username: 'brtf',
+	password: 'brtfuser',
 };
