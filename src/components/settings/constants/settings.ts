@@ -20,3 +20,27 @@ export const settingsSchema = yup
 		xpn: xpnSettingsSchema,
 	})
 	.defined();
+
+export const defaultSettings: SettingsStoreState = {
+	loaded: false,
+	network: { ip: '192.168.1.53', port: 8080, userName: 'brtf', password: '' },
+	gs: {
+		API_Key: 'AIzaSyCvBlKxPbNwXEas6eTNWL0rwVH1IiBZhLE',
+		GoogleSheetsID: '2PACX-1vTl1NfHLUoYlsQkHlaqyjNV9LdRT5PAkmrYcwajaRr-cuAcTLikSwakn4PQ3Vzp_A',
+		StudentID: 'ID',
+		Name_Column: 'Name for Credential',
+		Extra_Column: 'Dipl Program Descr',
+		Multiplier_Column: 'Multiplier',
+		Division_Column: 'Division',
+		OrderBy: '',
+	},
+	xpn: {
+		tmrDelay: 250,
+		ExtraTakeID: 1,
+		TakeID: 2,
+		Name: 'txtName',
+		Extra: 'txtOther',
+		Multiplier: 'txtMultiplier',
+		Background: 'bkg',
+	},
+};

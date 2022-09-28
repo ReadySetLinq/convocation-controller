@@ -3,12 +3,12 @@ import * as yup from 'yup';
 import { GoogleSheetsSettingsData } from '../interfaces/google-sheets';
 
 export const defaultGoogleSheetsSettingsData: GoogleSheetsSettingsData = {
-	API_Key: '',
-	GoogleSheetsID: '',
+	API_Key: 'AIzaSyCvBlKxPbNwXEas6eTNWL0rwVH1IiBZhLE',
+	GoogleSheetsID: '2PACX-1vTl1NfHLUoYlsQkHlaqyjNV9LdRT5PAkmrYcwajaRr-cuAcTLikSwakn4PQ3Vzp_A',
 	StudentID: 'ID',
-	Name_Column: 'Name for Recording',
+	Name_Column: 'Name for Credential',
 	Extra_Column: 'Dipl Program Descr',
-	Multiplier_Column: '',
+	Multiplier_Column: 'Multiplier',
 	Division_Column: 'Division',
 	OrderBy: '',
 };

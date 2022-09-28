@@ -3,9 +3,9 @@ import * as yup from 'yup';
 import { NetworkSettingsData } from '../interfaces/network';
 
 export const defaultNetworkSettingsData: NetworkSettingsData = {
-	ip: 'localhost',
-	port: 8181,
-	userName: '',
+	ip: '192.168.1.53',
+	port: 8080,
+	userName: 'brtf',
 	password: '',
 };
 

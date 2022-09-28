@@ -3,6 +3,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { Grid, Divider, Button } from '@material-ui/core';
 import BackupIcon from '@material-ui/icons/Backup';
 import SaveIcon from '@material-ui/icons/Save';
+import FolderSpecialIcon from '@material-ui/icons/FolderSpecial';
 import { isEqual } from 'lodash';
 
 import {
@@ -17,6 +18,7 @@ import {
 import Storage from '../../services/storage';
 import { useStyles } from '../../services/constants/styles';
 import LoadingSpinner from '../../views/loading-spinner';
+import { defaultSettings } from './constants/settings';
 
 import { GoogleSheetsSettingsData } from './interfaces/google-sheets';
 import { XpnSettingsData } from './interfaces/xpression';
@@ -34,6 +36,25 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 	const inputImport = useRef<HTMLInputElement>(null);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	const styles = useStyles();
+
+	const onUseDefaultButtonClick = useCallback(() => {
+		if (!isMounted.current) return;
+
+		setStatus('Loading...');
+
+		Storage.saveSettings({
+			loaded: isSettingsLoaded,
+			network: { ...defaultSettings.network, password: networkStore.password },
+			gs: defaultSettings.gs,
+			xpn: defaultSettings.xpn,
+		}).then(() => {
+			if (!isMounted.current) return;
+			setGoogleSheetsStore(defaultSettings.gs);
+			setXPNStore(defaultSettings.xpn);
+			setNetworkStore({ ...defaultSettings.network, password: networkStore.password });
+			window.location.reload();
+		});
+	}, [isSettingsLoaded, networkStore.password, setGoogleSheetsStore, setNetworkStore, setXPNStore]);
 
 	const handleImportChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +139,19 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 
 	return (
 		<Grid container spacing={1} alignItems='center' className={styles.centerRoot}>
+			<Button
+				variant='contained'
+				color={!isSubmitting ? 'primary' : 'secondary'}
+				className={styles.button}
+				size='large'
+				type='button'
+				onClick={onUseDefaultButtonClick}
+				disabled={isSubmitting}
+				startIcon={<FolderSpecialIcon />}
+			>
+				Load Default Settings
+			</Button>
+			<Divider orientation='vertical' flexItem />
 			<input
 				type='file'
 				accept='application/JSON'

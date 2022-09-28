@@ -194,7 +194,7 @@ const Settings = () => {
 													}
 													{...a11yProps(2)}
 												/>
-												<Tab disableRipple label={`[Import/Export]`} {...a11yProps(3)} />
+												<Tab disableRipple label={`[Load/Import/Export]`} {...a11yProps(3)} />
 											</Tabs>
 											<Paper>
 												<TabPanel value={tabIndex} index={0}>
