@@ -9,7 +9,7 @@
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
 		"sh-build": "build.sh",
-		"rail-build": "npm i && react-scripts build && sh-build",
+		"rail-build": "npm i && react-scripts build",
 		"rail-start": "npm i && sh-build && react-scripts start"
 	},
 	"repository": {
