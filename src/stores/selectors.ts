@@ -4,8 +4,11 @@ import { sortBy, isEqual, isEmpty, filter } from 'lodash';
 
 import { settingsState, studentsState } from './atoms';
 import { getDataValue } from '../services/utilities';
+import { clearGoogleCache } from '../services/google-sheets';
 
 import { defaultProgramName } from './constants/student-store';
+
+import { SettingsStoreState } from '../components/settings/interfaces/settings';
 import { GoogleSheetsSettingsData } from '../components/settings/interfaces/google-sheets';
 import { NetworkSettingsData } from '../components/settings/interfaces/network';
 import { XpnSettingsData } from '../components/settings/interfaces/xpression';
@@ -24,16 +27,20 @@ export const setLoadedSettings = atom(null, (get, set, item: boolean) =>
 	set(settingsState, { ...get(settingsState), loaded: item }),
 );
 
-export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheetsSettingsData) =>
-	set(settingsState, { ...get(settingsState), gs: item }),
-);
+export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheetsSettingsData) => {
+	const oldSettings = get(settingsState) as SettingsStoreState;
+	if (item.API_Key !== oldSettings.gs.API_Key || item.GoogleSheetsID !== oldSettings.gs.GoogleSheetsID) {
+		clearGoogleCache();
+	}
+	return set(settingsState, { ...oldSettings, gs: item });
+});
 
 export const setNetworkSettings = atom(null, (get, set, item: NetworkSettingsData) =>
-	set(settingsState, { ...get(settingsState), network: item }),
+	set(settingsState, { ...(get(settingsState) as SettingsStoreState), network: item }),
 );
 
 export const setXPNSettings = atom(null, (get, set, item: XpnSettingsData) =>
-	set(settingsState, { ...get(settingsState), xpn: item }),
+	set(settingsState, { ...(get(settingsState) as SettingsStoreState), xpn: item }),
 );
 
 // Students
@@ -62,7 +69,6 @@ export const getProgramStudents = atom((get) => {
 	const filteredStudents = get(studentsFromProgram);
 
 	if (isEmpty(filteredStudents)) return [];
-	//if (isEmpty(OrderBy)) return filteredStudents;
 	if (isEmpty(OrderBy) || OrderBy === undefined) return sortBy(filteredStudents, 'gs_id');
 
 	return sortBy(filteredStudents, OrderBy.split(','));
