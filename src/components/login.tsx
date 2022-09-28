@@ -10,7 +10,8 @@ import { TextFormField } from '../views/form-field';
 
 import { useStyles } from '../services/constants/styles';
 
-import { hashed, initialLogin, LoginProps, LoginState } from './interface/login';
+import { hashed } from './constants/login';
+import { initialLogin, LoginProps, LoginState } from './interface/login';
 
 const Login: React.FC<LoginProps> = ({ state, setState }) => {
 	const styles = useStyles();
