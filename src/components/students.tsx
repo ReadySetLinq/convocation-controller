@@ -49,10 +49,7 @@ const Students = () => {
 		[studentsStore],
 	);
 	const nextIndex = useMemo(() => (studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1), [studentsStore]);
-	const googleSheetsData = useMemo(
-		() => gsData(googleSheetsStore.GoogleSheetsID, googleSheetsStore.API_Key),
-		[googleSheetsStore],
-	);
+	const googleSheetsData = useMemo(() => gsData(googleSheetsStore.GoogleSheetsID), [googleSheetsStore]);
 	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
@@ -726,7 +723,7 @@ const Students = () => {
 
 		Emitter.on('xpression.error', (value: { data: { message: string } }) => {
 			if (!isMounted.current) return;
-			Emitter.emit('conn.disconnect', {})
+			Emitter.emit('conn.disconnect', {});
 			setTimeout(() => {
 				if (!isMounted.current) return;
 				setConnectionState({ connected: false, connecting: false, displayMsg: value.data.message });

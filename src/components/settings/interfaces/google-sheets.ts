@@ -1,5 +1,4 @@
 export interface GoogleSheetsSettingsData {
-	API_Key: string;
 	GoogleSheetsID: string;
 	StudentID: string;
 	Name_Column: string;

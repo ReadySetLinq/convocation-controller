@@ -1,13 +1,13 @@
+import { env } from 'process';
 import Papa from 'papaparse';
 
 import { decodeUnicode, encodeUnicode } from './utilities';
+import { defaultSheetsResponse, sessionKey } from './constants/google-sheets';
 
 import { gsObject } from './interfaces/google-sheets';
 
-import { defaultSheetsResponse, sessionKey } from './constants/google-sheets';
-
-export const getUrl = (id: string, apiKey: string) =>
-	`https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv&key=${apiKey}`;
+export const getUrl = (id: string) =>
+	`https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv&key=${env.REACT_APP_GOOGLE_API_KEY || ''}`;
 
 export const clearGoogleCache = () => {
 	sessionStorage.removeItem(sessionKey);
@@ -18,7 +18,7 @@ type CachedJSON = {
 	ttl: number;
 };
 
-export const gsData = async (spreadsheetId: string, apiKey: string): Promise<gsObject> => {
+export const gsData = async (spreadsheetId: string): Promise<gsObject> => {
 	return new Promise<gsObject>(async (resolve) => {
 		try {
 			const ONE_HOUR = 60 * 60 * 1000;
@@ -36,7 +36,7 @@ export const gsData = async (spreadsheetId: string, apiKey: string): Promise<gsO
 				}
 			}
 
-			const data = await fetchData(spreadsheetId, apiKey);
+			const data = await fetchData(spreadsheetId);
 
 			if (data) {
 				sessionStorage.setItem(
@@ -54,9 +54,9 @@ export const gsData = async (spreadsheetId: string, apiKey: string): Promise<gsO
 	//return await fetchData(spreadsheetId);
 };
 
-const fetchData = async (id: string, key: string) =>
+const fetchData = async (id: string) =>
 	new Promise<gsObject>(async (resolve, reject) => {
-		Papa.parse(getUrl(id, key), {
+		Papa.parse(getUrl(id), {
 			skipEmptyLines: true,
 			download: true,
 			header: true,

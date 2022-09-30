@@ -6,6 +6,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
 import Brightness6 from '@material-ui/icons/Brightness6';
 import Brightness7 from '@material-ui/icons/Brightness7';
+import { env } from 'process';
 
 import { themeState } from '../stores/atoms';
 import {
@@ -51,6 +52,8 @@ const Main = () => {
 			<Brightness7 className={styles.iconButton} />
 		);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
+
+	console.log('REACT_APP_GOOGLE_API_KEY', env.REACT_APP_GOOGLE_API_KEY);
 
 	const handleThemeToggle = useCallback(() => {
 		const newSate: ThemeTypesData = { ...themeStore, theme: themeStore.theme === 'light' ? 'dark' : 'light' };

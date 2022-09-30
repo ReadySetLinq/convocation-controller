@@ -29,7 +29,7 @@ export const setLoadedSettings = atom(null, (get, set, item: boolean) =>
 
 export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheetsSettingsData) => {
 	const oldSettings = get(settingsState) as SettingsStoreState;
-	if (item.API_Key !== oldSettings.gs.API_Key || item.GoogleSheetsID !== oldSettings.gs.GoogleSheetsID) {
+	if (item.GoogleSheetsID !== oldSettings.gs.GoogleSheetsID) {
 		clearGoogleCache();
 	}
 	return set(settingsState, { ...oldSettings, gs: item });
