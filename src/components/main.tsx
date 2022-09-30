@@ -52,8 +52,6 @@ const Main = () => {
 		);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
-	console.log('REACT_APP_GOOGLE_API_KEY', process.env.REACT_APP_GOOGLE_API_KEY);
-
 	const handleThemeToggle = useCallback(() => {
 		const newSate: ThemeTypesData = { ...themeStore, theme: themeStore.theme === 'light' ? 'dark' : 'light' };
 		Storage.saveData(defaultSettingKeys.Theme, newSate).finally(() => {
