@@ -724,6 +724,15 @@ const Students = () => {
 			Emitter.emit('xpn.start', { uuid: generate() });
 		});
 
+		Emitter.on('xpression.error', (value: { data: { message: string } }) => {
+			if (!isMounted.current) return;
+			Emitter.emit('conn.disconnect', {})
+			setTimeout(() => {
+				if (!isMounted.current) return;
+				setConnectionState({ connected: false, connecting: false, displayMsg: value.data.message });
+			}, 1500);
+		});
+
 		Emitter.on('xpression.controllerStarted', (value: { uuid: ''; response: false }) => {
 			if (!isMounted.current) return;
 			const { ExtraTakeID, TakeID } = xpnStore;
@@ -779,6 +788,8 @@ const Students = () => {
 		return () => {
 			isMounted.current = false; // Mark as unmounted
 			Emitter.off('xpression-started');
+			Emitter.off('xpression.loggedIn');
+			Emitter.off('xpression.error');
 			Emitter.off('xpression.controllerStarted');
 			Emitter.off('network.connecting');
 			Emitter.off('network.connected');

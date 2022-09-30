@@ -183,6 +183,12 @@ export class Connection implements ConnectionImplementations {
                   });
                 break;
               }
+              case "error": {
+                Emitter.emit("xpression.error", {
+                  data: _msg.data,
+                });
+                break;
+              }
               default:
                 break;
             }
