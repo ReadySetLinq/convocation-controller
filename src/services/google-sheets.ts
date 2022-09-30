@@ -1,4 +1,3 @@
-import { env } from 'process';
 import Papa from 'papaparse';
 
 import { decodeUnicode, encodeUnicode } from './utilities';
@@ -7,7 +6,7 @@ import { defaultSheetsResponse, sessionKey } from './constants/google-sheets';
 import { gsObject } from './interfaces/google-sheets';
 
 export const getUrl = (id: string) =>
-	`https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv&key=${env.REACT_APP_GOOGLE_API_KEY || ''}`;
+	`https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv&key=${process.env.REACT_APP_GOOGLE_API_KEY || ''}`;
 
 export const clearGoogleCache = () => {
 	sessionStorage.removeItem(sessionKey);
