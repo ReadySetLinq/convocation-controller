@@ -112,7 +112,7 @@ const Login: React.FC<LoginProps> = ({ state, setState }) => {
                       id="login.Username"
                       label="Username"
                       component={TextFormField}
-                      disabled={isSubmitting || !touched}
+                      disabled={isSubmitting}
                     />
                     <Field
                       name="password"
@@ -120,7 +120,7 @@ const Login: React.FC<LoginProps> = ({ state, setState }) => {
                       label="Password"
                       type="password"
                       component={TextFormField}
-                      disabled={isSubmitting || !touched}
+                      disabled={isSubmitting}
                     />
 
                     <Grid container spacing={1}>
@@ -129,9 +129,7 @@ const Login: React.FC<LoginProps> = ({ state, setState }) => {
                         <Button
                           variant="contained"
                           color={
-                            !isSubmitting && touched && isValid
-                              ? "primary"
-                              : "secondary"
+                            !isSubmitting && isValid ? "primary" : "secondary"
                           }
                           size="large"
                           type="submit"
@@ -142,7 +140,7 @@ const Login: React.FC<LoginProps> = ({ state, setState }) => {
                               values.password.length === 0)
                           }
                         >
-                          {isValid && dirty && !isSubmitting && touched
+                          {isValid && !isSubmitting
                             ? "Login"
                             : isSubmitting
                             ? "Logging In..."
