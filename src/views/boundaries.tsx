@@ -1,19 +1,21 @@
-import React from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Grid, Paper } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
-
-class ErrorBoundary extends React.Component {
+interface Props {
+	children: ReactNode;
+}
+class ErrorBoundary extends Component<Props> {
 	state = { hasError: false };
 
-	static getDerivedStateFromError(error: any) {
+	static getDerivedStateFromError = (_error: Error) => {
 		// Update state so the next render will show the fallback UI.
 		return { hasError: true };
-	}
+	};
 
-	componentDidCatch(error: any, errorInfo: any) {
+	componentDidCatch = (error: Error, errorInfo: ErrorInfo) => {
 		// You can also log the error to an error reporting service
 		console.error(error, errorInfo);
-	}
+	};
 
 	render() {
 		if (this.state.hasError) {
