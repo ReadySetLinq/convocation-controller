@@ -1,9 +1,9 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import { useSetAtom } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
-import { Box, AppBar, Toolbar, Tab, MenuItem, Select } from '@material-ui/core';
-import { TabContext, TabPanel, TabList } from '@material-ui/lab';
-import SettingsIcon from '@material-ui/icons/Settings';
+import { Box, AppBar, Toolbar, Tab, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { TabContext, TabPanel, TabList } from '@mui/lab';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import { convocationState } from '../stores/atoms';
 import { defaultConvocationStoreState } from '../stores/constants/convocationState';
@@ -14,13 +14,13 @@ import LoadingSpinner from '../views/loading-spinner';
 import { ConvocationStoreState } from '../stores/interfaces/convocation-store';
 
 export const ConvocationSelector = () => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	const setConvocation = useSetAtom(convocationState);
 	const { isLoading, error, data, isFetching } = useQuery(['getConvocations'], getConvocations);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
 	const handleChange = useCallback(
-		(event: React.ChangeEvent<{ value: unknown }>) => {
+		(event: SelectChangeEvent<{ value: unknown }>) => {
 			if (!isMounted.current) return;
 
 			const selectedConvocation = data?.convocations.find(
@@ -54,11 +54,11 @@ export const ConvocationSelector = () => {
 	if (!data || isLoading || isFetching) return <LoadingSpinner color='secondary' />;
 
 	return (
-		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
+		<Box color='text.primary' bgcolor='background.paper' className={classes.boxWrapper} flexGrow={1} height='200vh'>
 			<TabContext value='login'>
-				<AppBar position='static' color='inherit' className={styles.appBar}>
+				<AppBar position='static' color='inherit' className={classes.appBar}>
 					<Toolbar>
-						<div className={styles.fullWidth}>
+						<div className={classes.fullWidth}>
 							<TabList variant='fullWidth' indicatorColor='primary' textColor='primary' aria-label='Menu Bar'>
 								<Tab value='login' label='Login' aria-label='Login' icon={<SettingsIcon />} disableRipple />
 							</TabList>
@@ -66,8 +66,8 @@ export const ConvocationSelector = () => {
 					</Toolbar>
 				</AppBar>
 				<TabPanel value='login'>
-					<div className={styles.fullWidth}>
-						<div className={styles.errorText}>{error ?? error}</div>
+					<div className={classes.fullWidth}>
+						<div className={classes.errorText}>{error ?? error}</div>
 						<Select fullWidth onChange={handleChange}>
 							{data.map((item: ConvocationStoreState) => (
 								<MenuItem key={`selectFormField-${item.id}`} value={item.id}>

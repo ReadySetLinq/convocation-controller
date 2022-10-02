@@ -1,5 +1,5 @@
 import React from 'react';
-import { Paper } from '@material-ui/core';
+import { Paper } from '@mui/material';
 import { useStyles } from '../services/constants/styles';
 
 import { TabPanelProps } from './interfaces/tab-panel';
@@ -13,7 +13,7 @@ export const a11yProps = (index: number) => {
 
 export const TabPanel = (props: TabPanelProps) => {
 	const { children, value, index, ...other } = props;
-	const styles = useStyles();
+	const { classes } = useStyles();
 
 	return (
 		<div
@@ -23,7 +23,7 @@ export const TabPanel = (props: TabPanelProps) => {
 			aria-labelledby={`full-width-tab-${index}`}
 			{...other}
 		>
-			{value === index && <Paper className={styles.paper}>{children}</Paper>}
+			{value === index && <Paper className={classes.paper}>{children}</Paper>}
 		</div>
 	);
 };

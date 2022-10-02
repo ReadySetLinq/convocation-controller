@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { useAtom } from 'jotai';
 import { isEqual } from 'lodash';
-import { NativeSelect } from '@material-ui/core';
+import { NativeSelect } from '@mui/material';
 import { generate } from 'shortid';
 
 import { studentsState } from '../../stores/atoms';

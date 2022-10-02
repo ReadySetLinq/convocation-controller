@@ -1,9 +1,9 @@
 import React, { useCallback, useState, useRef, useEffect, memo } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { Grid, Divider, Button } from '@material-ui/core';
-import BackupIcon from '@material-ui/icons/Backup';
-import SaveIcon from '@material-ui/icons/Save';
-import FolderSpecialIcon from '@material-ui/icons/FolderSpecial';
+import { Grid, Divider, Button } from '@mui/material';
+import BackupIcon from '@mui/icons-material/Backup';
+import SaveIcon from '@mui/icons-material/Save';
+import FolderSpecialIcon from '@mui/icons-material/FolderSpecial';
 import { isEqual } from 'lodash';
 
 import {
@@ -35,7 +35,7 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 	const [status, setStatus] = useState<string>('');
 	const inputImport = useRef<HTMLInputElement>(null);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
-	const styles = useStyles();
+	const { classes } = useStyles();
 
 	const onUseDefaultButtonClick = useCallback(() => {
 		if (!isMounted.current) return;
@@ -138,11 +138,11 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 	if (status !== '') return <LoadingSpinner key={'settings.ImportExportLoadingSpinner'} label={status} />;
 
 	return (
-		<Grid container spacing={1} alignItems='center' className={styles.centerRoot}>
+		<Grid container spacing={1} alignItems='center' className={classes.centerRoot}>
 			<Button
 				variant='contained'
 				color={!isSubmitting ? 'primary' : 'secondary'}
-				className={styles.button}
+				className={classes.button}
 				size='large'
 				type='button'
 				onClick={onUseDefaultButtonClick}
@@ -165,7 +165,7 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 			<Button
 				variant='contained'
 				color={!isSubmitting ? 'primary' : 'secondary'}
-				className={styles.button}
+				className={classes.button}
 				size='large'
 				onClick={onImportButtonClick}
 				type='button'
@@ -178,7 +178,7 @@ const ImportExportSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 			<Button
 				variant='contained'
 				color={!isSubmitting ? 'primary' : 'secondary'}
-				className={styles.button}
+				className={classes.button}
 				size='large'
 				type='button'
 				onClick={onExportButtonClick}
