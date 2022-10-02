@@ -8,4 +8,8 @@ export const defaultStorageKeys: {
 	},
 };
 
+export const defaultDataKeys = {
+	GS: 'convocation.Data.google-sheets',
+};
+
 export const defaultSettingKeys = defaultStorageKeys.Settings;

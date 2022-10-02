@@ -42,7 +42,7 @@ class ErrorBoundary extends Component<Props> {
 			);
 		}
 
-		return this.props.children;
+		return <>this.props.children</>;
 	}
 }
 
