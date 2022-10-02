@@ -10,10 +10,12 @@ import Brightness7 from '@material-ui/icons/Brightness7';
 
 import { themeState, convocationState } from '../stores/atoms';
 import {
-	loadedSettings,
 	setLoadedSettings,
+	googleSheetsSettings,
 	setGoogleSheetsSettings,
+	networkSettings,
 	setNetworkSettings,
+	xpnSettings,
 	setXPNSettings,
 } from '../stores/selectors';
 
@@ -21,7 +23,16 @@ import Emitter from '../services/emitter';
 import Storage from '../services/storage';
 import { useStyles } from '../services/constants/styles';
 import { defaultSettingKeys } from '../services/constants/storage';
-import { getConvocation } from '../services/api';
+import {
+	defaultConvocation,
+	getConvocation,
+	getNetwork,
+	defaultNetwork,
+	getGoogleSheet,
+	defaultGoogleSheet,
+	getXpression,
+	defaultXpression,
+} from '../services/api';
 
 import Students from './students';
 import Settings from './settings/settings';
@@ -36,6 +47,9 @@ const Main = () => {
 	const styles = useStyles();
 	const [state, setState] = useState<MainState>(initialMainState);
 	const convocationStore = useAtomValue(convocationState);
+	const googleSheetsStore = useAtomValue(googleSheetsSettings);
+	const xpnStore = useAtomValue(xpnSettings);
+	const networkStore = useAtomValue(networkSettings);
 	const setGoogleSheetsStore = useSetAtom(setGoogleSheetsSettings);
 	const setXPNStore = useSetAtom(setXPNSettings);
 	const setNetworkStore = useSetAtom(setNetworkSettings);
@@ -49,7 +63,32 @@ const Main = () => {
 		) : (
 			<Brightness7 className={styles.iconButton} />
 		);
-	const convocationQuery = useQuery(['getConvocation', convocationStore.id], () => getConvocation(convocationStore.id));
+	const convocationQuery = useQuery(
+		['getConvocation', convocationStore.id],
+		() => getConvocation(convocationStore.id),
+		{ enabled: convocationStore.id !== defaultConvocation.id },
+	);
+	const { data: googleSheetQueryData } = useQuery(
+		['getGoogleSheet', convocationQuery.data?.googleSheetId],
+		() => getGoogleSheet(convocationQuery.data?.googleSheetId ?? ''),
+		{
+			enabled: googleSheetsStore.id !== defaultGoogleSheet.id,
+		},
+	);
+	const { data: xpressionSheetQueryData } = useQuery(
+		['getXpression', convocationQuery.data?.xpressionId],
+		() => getXpression(convocationQuery.data?.xpressionId ?? ''),
+		{
+			enabled: xpnStore.id !== defaultXpression.id,
+		},
+	);
+	const { data: networkQueryData } = useQuery(
+		['getNetwork', convocationQuery.data?.networkId],
+		() => getNetwork(convocationQuery.data?.networkId ?? ''),
+		{
+			enabled: networkStore.id !== defaultNetwork.id,
+		},
+	);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
 	const handleThemeToggle = useCallback(() => {
@@ -70,17 +109,62 @@ const Main = () => {
 	useEffect(() => {
 		if (!isMounted.current) return;
 
+		if (googleSheetQueryData) {
+			setGoogleSheetsStore(googleSheetQueryData);
+		}
+	}, [googleSheetQueryData, setGoogleSheetsStore]);
+
+	useEffect(() => {
+		if (!isMounted.current) return;
+
+		if (xpressionSheetQueryData) {
+			setXPNStore(xpressionSheetQueryData);
+		}
+	}, [xpressionSheetQueryData, setXPNStore]);
+
+	useEffect(() => {
+		if (!isMounted.current) return;
+
+		if (networkQueryData) {
+			setNetworkStore(networkQueryData);
+		}
+	}, [networkQueryData, setNetworkStore]);
+
+	useEffect(() => {
+		if (!isMounted.current) return;
+
 		const { isLoading, data, isFetching } = convocationQuery;
 
-		if (!isLoading && !isFetching && data) {
+		if (!isLoading && !isFetching) {
 			console.log('convocationQuery', data);
-			const { googleSheets, xpn, network } = data;
-			setGoogleSheetsStore(googleSheets);
-			setXPNStore(xpn);
-			setNetworkStore(network);
+			setGoogleSheetsStore({ ...googleSheetsStore, id: data?.googleSheetId ?? '' });
+			setXPNStore({ ...xpnStore, id: data?.xpressionId ?? '' });
+			setNetworkStore({ ...networkStore, id: data?.networkId ?? '' });
+		}
+
+		if (
+			!isLoading &&
+			!isFetching &&
+			networkQueryData !== undefined &&
+			googleSheetQueryData !== undefined &&
+			xpressionSheetQueryData !== undefined
+		) {
+			console.log('convocationQuery', data);
 			setLoadedStore(true);
 		}
-	}, [convocationQuery, setGoogleSheetsStore, setLoadedStore, setNetworkStore, setXPNStore]);
+	}, [
+		convocationQuery,
+		googleSheetQueryData,
+		googleSheetsStore,
+		networkQueryData,
+		networkStore,
+		setGoogleSheetsStore,
+		setLoadedStore,
+		setNetworkStore,
+		setXPNStore,
+		xpnStore,
+		xpressionSheetQueryData,
+	]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -101,6 +185,9 @@ const Main = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	if (networkQueryData === undefined || googleSheetQueryData === undefined || xpressionSheetQueryData === undefined)
+		return <LoadingSpinner label='Loading Settings...' />;
 
 	return (
 		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>

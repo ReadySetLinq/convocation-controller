@@ -23,8 +23,9 @@ export const settingsSchema = yup
 
 export const defaultSettings: SettingsStoreState = {
 	loaded: false,
-	network: { ip: '192.168.1.53', port: 8080, userName: 'brtf', password: '' },
+	network: { id: '', ip: '192.168.1.53', port: 8080, userName: 'brtf', password: '' },
 	gs: {
+		id: '',
 		GoogleSheetsID: '2PACX-1vTl1NfHLUoYlsQkHlaqyjNV9LdRT5PAkmrYcwajaRr-cuAcTLikSwakn4PQ3Vzp_A',
 		StudentID: 'ID',
 		Name_Column: 'Name for Credential',
@@ -34,6 +35,7 @@ export const defaultSettings: SettingsStoreState = {
 		OrderBy: '',
 	},
 	xpn: {
+		id: '',
 		tmrDelay: 250,
 		ExtraTakeID: 1,
 		TakeID: 2,

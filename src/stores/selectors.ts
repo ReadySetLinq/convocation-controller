@@ -52,7 +52,7 @@ export const studentsFromProgram = atom((get) => {
 	const { Extra_Column } = get(settingsState).gs;
 
 	if (students.length === 0) return [];
-	if (Extra_Column === undefined || Extra_Column.trim().length === 0) return [];
+	if (Extra_Column === null || Extra_Column.trim().length === 0) return [];
 
 	return filter(students, (student) => {
 		return isEqual(program.toString(), getDataValue(student, Extra_Column));
@@ -69,7 +69,7 @@ export const getProgramStudents = atom((get) => {
 	const filteredStudents = get(studentsFromProgram);
 
 	if (isEmpty(filteredStudents)) return [];
-	if (isEmpty(OrderBy) || OrderBy === undefined) return sortBy(filteredStudents, 'gs_id');
+	if (isEmpty(OrderBy) || OrderBy === null) return sortBy(filteredStudents, 'gs_id');
 
 	return sortBy(filteredStudents, OrderBy.split(','));
 });

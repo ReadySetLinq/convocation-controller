@@ -3,6 +3,7 @@ import * as yup from 'yup';
 import { NetworkSettingsData } from '../interfaces/network';
 
 export const defaultNetworkSettingsData: NetworkSettingsData = {
+	id: '',
 	ip: '192.168.1.53',
 	port: 8080,
 	userName: 'brtf',
@@ -11,6 +12,7 @@ export const defaultNetworkSettingsData: NetworkSettingsData = {
 
 export const networkSettingsSchema: yup.ObjectSchema<NetworkSettingsData> = yup
 	.object({
+		id: yup.string().default(defaultNetworkSettingsData.id).defined(),
 		ip: yup.string().trim().min(1, 'IP to short!').required('IP Required!'),
 		port: yup
 			.number()

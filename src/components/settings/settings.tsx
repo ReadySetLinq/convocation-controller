@@ -1,5 +1,6 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
+import { useMutation } from '@tanstack/react-query';
 import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { isEqual } from 'lodash';
@@ -16,18 +17,16 @@ import {
 import NetworkSettings from './network';
 import XpressionSettings from './xpression';
 import GoogleSheetsSettings from './google-sheets';
-import ImportExportSettings from './import-export';
-import Storage from '../../services/storage';
 import { useStyles } from '../../services/constants/styles';
 import { TabPanel, a11yProps } from '../../views/tab-panel';
 import LoadingSpinner from '../../views/loading-spinner';
 
+import { settingsSchema } from './constants/settings';
+import { clearGoogleCache } from '../../services/google-sheets';
+import { updateNetwork, updateGoogleSheet, updateXpression } from '../../services/api';
+
 // Import Interfaces
 import { SettingsState } from './interfaces/settings';
-
-import { settingsSchema } from './constants/settings';
-import { defaultSettingKeys } from '../../services/constants/storage';
-import { clearGoogleCache } from '../../services/google-sheets';
 
 const Settings = () => {
 	const styles = useStyles();
@@ -44,7 +43,11 @@ const Settings = () => {
 		xpn: xpnStore,
 	};
 	const [tabIndex, setTabIndex] = useState(0);
+	const networkMutation = useMutation(updateNetwork);
+	const googleSheetMutation = useMutation(updateGoogleSheet);
+	const xpressionMutation = useMutation(updateXpression);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
+
 	const hasChanged = useCallback(
 		(values: SettingsState) =>
 			!isEqual(values.gs, googleSheetsStore) ||
@@ -78,28 +81,36 @@ const Settings = () => {
 
 			if (!isEqual(values.gs, googleSheetsStore)) {
 				updatedValues.push(
-					Storage.saveData(defaultSettingKeys.GS, values.gs).then(() => {
-						if (!isMounted.current) return;
-						if (!isEqual(values.gs.GoogleSheetsID, googleSheetsStore.GoogleSheetsID)) clearGoogleCache(); // ID changed so clear cached data
-						setGoogleSheetsStore(values.gs);
+					googleSheetMutation.mutate(values.gs, {
+						onSettled: (data, _error, variables) => {
+							if (!isMounted.current) return;
+							if (data?.GoogleSheetsID !== googleSheetsStore.GoogleSheetsID) {
+								clearGoogleCache();
+							}
+							setGoogleSheetsStore(data ?? variables);
+						},
 					}),
 				);
 			}
 
 			if (!isEqual(values.xpn, xpnStore)) {
 				updatedValues.push(
-					Storage.saveData(defaultSettingKeys.XPN, values.xpn).then(() => {
-						if (!isMounted.current) return;
-						setXPNStore(values.xpn);
+					xpressionMutation.mutate(values.xpn, {
+						onSettled: (data, _error, variables) => {
+							if (!isMounted.current) return;
+							setXPNStore(data ?? variables);
+						},
 					}),
 				);
 			}
 
 			if (!isEqual(values.network, networkStore)) {
 				updatedValues.push(
-					Storage.saveData(defaultSettingKeys.Network, values.network).then(() => {
-						if (!isMounted.current) return;
-						setNetworkStore(values.network);
+					networkMutation.mutate(values.network, {
+						onSettled: (data, _error, variables) => {
+							if (!isMounted.current) return;
+							setNetworkStore(data ?? variables);
+						},
 					}),
 				);
 			}
@@ -111,7 +122,17 @@ const Settings = () => {
 				actions.resetForm({ values });
 			});
 		},
-		[googleSheetsStore, networkStore, setGoogleSheetsStore, setNetworkStore, setXPNStore, xpnStore],
+		[
+			googleSheetMutation,
+			googleSheetsStore,
+			networkMutation,
+			networkStore,
+			setGoogleSheetsStore,
+			setNetworkStore,
+			setXPNStore,
+			xpnStore,
+			xpressionMutation,
+		],
 	);
 
 	useEffect(() => {
@@ -194,7 +215,6 @@ const Settings = () => {
 													}
 													{...a11yProps(2)}
 												/>
-												<Tab disableRipple label={`[Load/Import/Export]`} {...a11yProps(3)} />
 											</Tabs>
 											<Paper>
 												<TabPanel value={tabIndex} index={0}>
@@ -205,9 +225,6 @@ const Settings = () => {
 												</TabPanel>
 												<TabPanel value={tabIndex} index={2}>
 													<XpressionSettings key={'settings.XpressionSettings'} isSubmitting={isSubmitting} />
-												</TabPanel>
-												<TabPanel value={tabIndex} index={3}>
-													<ImportExportSettings key={'settings.ImportExportSettings'} isSubmitting={isSubmitting} />
 												</TabPanel>
 											</Paper>
 										</div>

@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useEffect } from 'react';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
 import { Box, AppBar, Toolbar, Tab, MenuItem, Select } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
@@ -15,15 +15,19 @@ import { ConvocationStoreState } from '../stores/interfaces/convocation-store';
 
 export const ConvocationSelector = () => {
 	const styles = useStyles();
+	const convocation = useAtomValue(convocationState);
 	const setConvocation = useSetAtom(convocationState);
-	const { isLoading, error, data, isFetching } = useQuery(['getConvocations'], getConvocations);
+	const { isLoading, error, data, isFetching } = useQuery(['getConvocations'], getConvocations, {
+		refetchOnWindowFocus: false,
+		enabled: convocation.id === defaultConvocationStoreState.id,
+	});
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<{ value: unknown }>) => {
 			if (!isMounted.current) return;
 
-			const selectedConvocation = data?.convocations.find(
+			const selectedConvocation = data?.find(
 				(convocation: ConvocationStoreState) => convocation.id === event.target.value,
 			);
 			if (selectedConvocation) setConvocation(selectedConvocation);
@@ -35,7 +39,7 @@ export const ConvocationSelector = () => {
 		if (!isMounted.current) return;
 		console.log('getConvocations data', data);
 
-		if (data.length > 0) {
+		if (data !== undefined && data.length > 0) {
 			setConvocation({ ...defaultConvocationStoreState, id: data[0]?.id, title: data[0]?.title });
 		}
 	}, [data, setConvocation]);
@@ -51,7 +55,10 @@ export const ConvocationSelector = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	if (!data || isLoading || isFetching) return <LoadingSpinner color='secondary' />;
+	console.log('ConvocationSelector', data);
+	console.log('ConvocationSelector', isLoading, isFetching, error);
+
+	if (!data || isLoading || isFetching) return <LoadingSpinner label='Loading Convocation List...' color='secondary' />;
 
 	return (
 		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
@@ -67,7 +74,7 @@ export const ConvocationSelector = () => {
 				</AppBar>
 				<TabPanel value='login'>
 					<div className={styles.fullWidth}>
-						<div className={styles.errorText}>{error ?? error}</div>
+						<div className={styles.errorText}>Error!</div>
 						<Select fullWidth onChange={handleChange}>
 							{data.map((item: ConvocationStoreState) => (
 								<MenuItem key={`selectFormField-${item.id}`} value={item.id}>
