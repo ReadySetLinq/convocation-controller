@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 
 import { sortBy, isEqual, isEmpty, filter } from 'lodash';
 
-import { settingsState, studentsState } from './atoms';
+import { settingsState, studentsState, connectionState } from './atoms';
 import { getDataValue } from '../services/utilities';
 import { clearGoogleCache } from '../services/google-sheets';
 
@@ -13,6 +13,27 @@ import { GoogleSheetsSettingsData } from '../components/settings/interfaces/goog
 import { NetworkSettingsData } from '../components/settings/interfaces/network';
 import { XpnSettingsData } from '../components/settings/interfaces/xpression';
 import { StudentsStoreState } from './interfaces/student-store';
+
+// Connection
+export const isConnected = atom((get) => get(connectionState).connected);
+
+export const isConnecting = atom((get) => get(connectionState).connecting);
+
+export const connectionMessage = atom((get) => get(connectionState).displayMsg);
+
+export const setConnected = atom(null, (get, set, item: boolean) => {
+	const data = item ? { connected: true, connecting: false } : { connected: false };
+	return set(connectionState, { ...get(connectionState), ...data });
+});
+
+export const setIsConnecting = atom(null, (get, set, item: boolean) => {
+	const data = item ? { connecting: true, connected: false } : { connecting: false };
+	return set(connectionState, { ...get(connectionState), ...data });
+});
+
+export const setConnectionMessage = atom(null, (get, set, item: string) =>
+	set(connectionState, { ...get(connectionState), ...{ displayMsg: item } }),
+);
 
 // Settings
 export const loadedSettings = atom((get) => get(settingsState).loaded);

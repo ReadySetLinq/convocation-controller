@@ -1,12 +1,12 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
-import { Box, AppBar, Toolbar, Tab, MenuItem, Select } from '@material-ui/core';
+import { Box, AppBar, Toolbar, Tab, MenuItem, Select, FormControl, InputLabel } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
-import SettingsIcon from '@material-ui/icons/Settings';
+import ListAltIcon from '@material-ui/icons/ListAlt';
 
 import { convocationState } from '../stores/atoms';
-import { defaultConvocationStoreState } from '../stores/constants/convocationState';
+import { defaultConvocationStoreState } from '../stores/constants/convocation-store';
 import { getConvocations } from '../services/api';
 import { useStyles } from '../services/constants/styles';
 
@@ -39,8 +39,8 @@ export const ConvocationSelector = () => {
 		if (!isMounted.current) return;
 		console.log('getConvocations data', data);
 
-		if (data !== undefined && data.length > 0) {
-			setConvocation({ ...defaultConvocationStoreState, id: data[0]?.id, title: data[0]?.title });
+		if (data === undefined || data.length <= 0) {
+			setConvocation({ ...defaultConvocationStoreState });
 		}
 	}, [data, setConvocation]);
 
@@ -55,33 +55,39 @@ export const ConvocationSelector = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	console.log('ConvocationSelector', data);
-	console.log('ConvocationSelector', isLoading, isFetching, error);
-
 	if (!data || isLoading || isFetching) return <LoadingSpinner label='Loading Convocation List...' color='secondary' />;
 
 	return (
 		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
-			<TabContext value='login'>
+			<TabContext value='convocation'>
 				<AppBar position='static' color='inherit' className={styles.appBar}>
 					<Toolbar>
 						<div className={styles.fullWidth}>
 							<TabList variant='fullWidth' indicatorColor='primary' textColor='primary' aria-label='Menu Bar'>
-								<Tab value='login' label='Login' aria-label='Login' icon={<SettingsIcon />} disableRipple />
+								<Tab
+									value='convocation'
+									label='Convocation Select'
+									aria-label='Convocation Select'
+									icon={<ListAltIcon />}
+									disableRipple
+								/>
 							</TabList>
 						</div>
 					</Toolbar>
 				</AppBar>
-				<TabPanel value='login'>
+				<TabPanel value='convocation'>
 					<div className={styles.fullWidth}>
-						<div className={styles.errorText}>Error!</div>
-						<Select fullWidth onChange={handleChange}>
-							{data.map((item: ConvocationStoreState) => (
-								<MenuItem key={`selectFormField-${item.id}`} value={item.id}>
-									{item.title}
-								</MenuItem>
-							))}
-						</Select>
+						{error && <div className={styles.errorText}>Error: {JSON.stringify(error)}</div>}
+						<FormControl fullWidth className={styles.formControl}>
+							<InputLabel id='convocation-selector-input-label'>Select</InputLabel>
+							<Select fullWidth labelId='convocation-selector' id='convocation-selector' onChange={handleChange}>
+								{data.map((item: ConvocationStoreState) => (
+									<MenuItem key={`selectFormField-${item.id}`} value={item.id}>
+										{item.title}
+									</MenuItem>
+								))}
+							</Select>
+						</FormControl>
 					</div>
 				</TabPanel>
 			</TabContext>

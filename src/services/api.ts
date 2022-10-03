@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export type Convocations = {
 	id: string;
 	title: string;
@@ -8,8 +10,11 @@ export type Convocation = {
 	title: string;
 	createdAt: Date;
 	updatedAt: Date;
+	googleSheet: GoogleSheets;
 	googleSheetId: string | null;
+	network: Network;
 	networkId: string | null;
+	xpression: Xpression;
 	xpressionId: string | null;
 };
 
@@ -43,16 +48,6 @@ export type Xpression = {
 	Background: string;
 };
 
-export const defaultConvocation: Convocation = {
-	id: '',
-	title: 'Fall 2022',
-	googleSheetId: null,
-	networkId: null,
-	xpressionId: null,
-	createdAt: new Date(),
-	updatedAt: new Date(),
-};
-
 export const defaultNetwork: Network = {
 	id: '',
 	ip: 'localhost',
@@ -83,92 +78,110 @@ export const defaultXpression: Xpression = {
 	Background: 'bkg',
 };
 
-const GET = async (url: string) =>
-	await fetch(`${process.env.REACT_APP_API_URL}/${url}`, {
-		method: 'GET',
-		headers: { 'Content-Type': 'application/json' },
-		mode: 'no-cors',
-	});
-
-const POST = async (url: string, data: Object) => {
-	console.log('POST', url, data, JSON.stringify(data));
-	return await fetch(`${process.env.REACT_APP_API_URL}/${url}`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		mode: 'no-cors',
-		body: JSON.stringify(data),
-	});
+export const defaultConvocation: Convocation = {
+	id: '',
+	title: 'Fall 2022',
+	googleSheet: defaultGoogleSheet,
+	googleSheetId: null,
+	network: defaultNetwork,
+	networkId: null,
+	xpression: defaultXpression,
+	xpressionId: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };
 
-export const getLogin = async (username: string, password: string) => {
-	console.log('getLogin password', password);
+export const axiosInstance = axios.create({
+	baseURL: `${process.env.REACT_APP_API_URL}`,
+	timeout: 1000,
+	headers: { 'Content-Type': 'application/json; charset=utf-8' },
+	withCredentials: false,
+});
 
-	const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		mode: 'no-cors',
-		body: JSON.stringify({ username, password }),
-	});
-	const data = await response.json();
-	console.log('getLogin data', data);
-	/*
-	const response = await POST(`login`, { username, password });
-	const { results } = await response.json();
-	console.log('getLogin results', results);
-	*/
-	return false;
+export const getLogin = async (username: string, password: string) => {
+	const {
+		data: { results },
+	} = await axiosInstance.post('/login', { username, password });
+
+	return results?.success ?? false;
 };
 
 export const getConvocations = async () => {
-	const response = await GET(`convocation`);
-	const { results } = await response.json();
+	const {
+		data: { results },
+	} = await axiosInstance.get('/convocations');
+
 	console.log('getConvocations results', results);
 
-	return [{ id: 'cl8qijlqi00009b7wld5zfp47', title: 'Fall 2022' }];
+	return [...results] as Convocations[];
 };
 
 export const getConvocation = async (id: string) => {
 	console.log('getConvocation', id);
-	const result = await GET(`convocation/${id}`);
-	console.log('getConvocation', await result.json());
-	return { ...defaultConvocation, ...(await result.json()) } as Convocation;
+	const {
+		data: { results },
+	} = await axiosInstance.get(`/convocation/${id}`);
+
+	console.log('getConvocation', results);
+	return { ...defaultConvocation, ...results } as Convocation;
 };
 
 export const getNetwork = async (id: string) => {
 	console.log('getNetwork', id);
-	const result = await GET(`network/${id}`);
-	console.log('getNetwork', await result.json());
-	return { ...defaultNetwork, ...(await result.json()) } as Network;
+	const {
+		data: { results },
+	} = await axiosInstance.get(`/network/${id}`);
+
+	console.log('getNetwork', results);
+	return { ...defaultNetwork, ...results } as Network;
 };
 
 export const updateNetwork = async (data: Network) => {
-	const result = await POST(`network/${data.id}`, data);
-	console.log('updateNetwork', await result.json());
-	return { ...defaultNetwork, ...(await result.json()) } as Network;
+	const {
+		data: { results },
+	} = await axiosInstance.post(`/network/${data.id}`, { ...data });
+
+	console.log('updateNetwork', results);
+
+	return { ...defaultNetwork, ...results } as Network;
 };
 
 export const getGoogleSheet = async (id: string) => {
 	console.log('getGoogleSheet', id);
-	const result = await GET(`googleSheet/${id}`);
-	console.log('getGoogleSheet', await result.json());
-	return { ...defaultGoogleSheet, ...(await result.json()) } as GoogleSheets;
+	const {
+		data: { results },
+	} = await axiosInstance.get(`/googleSheet/${id}`);
+
+	console.log('getGoogleSheet', results);
+	return { ...defaultGoogleSheet, ...results } as GoogleSheets;
 };
 
 export const updateGoogleSheet = async (data: GoogleSheets) => {
-	const result = await POST(`googleSheet/${data.id}`, data);
-	console.log('updateGoogleSheet', await result.json());
-	return { ...defaultGoogleSheet, ...(await result.json()) } as GoogleSheets;
+	const {
+		data: { results },
+	} = await axiosInstance.post(`/googleSheet/${data.id}`, { ...data });
+
+	console.log('updateGoogleSheet', results);
+
+	return { ...defaultGoogleSheet, ...results } as GoogleSheets;
 };
 
 export const getXpression = async (id: string) => {
 	console.log('getXpression', id);
-	const result = await GET(`xpression/${id}`);
-	console.log('getXpression', await result.json());
-	return { ...defaultXpression, ...(await result.json()) } as Xpression;
+	const {
+		data: { results },
+	} = await axiosInstance.get(`/xpression/${id}`);
+
+	console.log('getXpression', results);
+	return { ...defaultXpression, ...results } as Xpression;
 };
 
 export const updateXpression = async (data: Xpression) => {
-	const result = await POST(`xpression/${data.id}`, data);
-	console.log('updateXpression', await result.json());
-	return { ...defaultXpression, ...(await result.json()) } as Xpression;
+	const {
+		data: { results },
+	} = await axiosInstance.post(`/xpression/${data.id}`, { ...data });
+
+	console.log('updateXpression', results);
+
+	return { ...defaultXpression, ...results } as Xpression;
 };

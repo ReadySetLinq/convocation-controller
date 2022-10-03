@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useAtomValue, useAtom } from 'jotai';
 
 import { convocationState, themeState } from '../stores/atoms';
-import { defaultConvocationStoreState } from '../stores/constants/convocationState';
+import { defaultConvocationStoreState } from '../stores/constants/convocation-store';
 import Storage from '../services/storage';
 import { defaultSettingKeys } from '../services/constants/storage';
 
@@ -51,8 +51,6 @@ export const Display = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
-	console.log('Display', loginState);
 
 	if (!themeStore) return <LoadingSpinner color='secondary' />;
 	else if (!loginState.loggedIn) return <Login state={loginState} setState={setLoginState} />;

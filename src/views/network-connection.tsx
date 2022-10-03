@@ -1,18 +1,21 @@
 import React, { Fragment } from 'react';
+import { useAtomValue } from 'jotai';
 import { Grid, Paper } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 
 import { useStyles } from '../services/constants/styles';
+import { isConnected, isConnecting, connectionMessage } from '../stores/selectors';
 import NetworkDisplay from './network-display';
 
-import { NetworkConnectionProps } from './interfaces/network-connection';
-
-const NetworkConnection: React.FC<NetworkConnectionProps> = ({ state }) => {
+const NetworkConnection = () => {
 	const styles = useStyles();
-	const severity = state.connected ? 'success' : state.connecting ? 'warning' : 'error';
+	const isConnectedStore = useAtomValue(isConnected);
+	const isConnectingStore = useAtomValue(isConnecting);
+	const connectionMessageStore = useAtomValue(connectionMessage);
+	const severity = isConnectedStore ? 'success' : isConnectingStore ? 'warning' : 'error';
 
 	// Return an empty element if the network is connected
-	if (state.connected) return <Fragment></Fragment>;
+	if (isConnectedStore) return <Fragment></Fragment>;
 
 	return (
 		<Grid container className={styles.grid} justify='center' spacing={1}>
@@ -23,9 +26,9 @@ const NetworkConnection: React.FC<NetworkConnectionProps> = ({ state }) => {
 						key='networkConnection.Alert'
 						severity={severity}
 						variant='outlined'
-						action={<NetworkDisplay key={'networkConnection.NetworkDisplay'} size='large' state={state} />}
+						action={<NetworkDisplay key={'networkConnection.NetworkDisplay'} size='large' />}
 					>
-						<AlertTitle>{state.displayMsg}</AlertTitle>
+						<AlertTitle>{connectionMessageStore}</AlertTitle>
 					</Alert>
 				</Paper>
 			</Grid>

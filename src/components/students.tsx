@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import { Grid, Button, Paper } from '@material-ui/core';
@@ -6,7 +6,7 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import { isEqual, isEmpty, sortBy, filter, findIndex } from 'lodash';
 import { generate } from 'shortid';
 
-import { studentsState } from '../stores/atoms';
+import { connectionState, studentsState } from '../stores/atoms';
 import {
 	loadedSettings,
 	googleSheetsSettings,
@@ -26,18 +26,16 @@ import { StudentDisplay, ProgramsDisplay, OnlineButtonsDisplay } from '../views/
 // Import Interfaces
 import { StudentData, StudentsStoreState } from '../stores/interfaces/student-store';
 import { editTakeItemProps } from './interface/students';
-import { ConnectionState } from '../services/interfaces/connection';
 import { XPN_TakeItem_Data } from '../services/interfaces/xpn-events';
 import { gsObject } from '../services/interfaces/google-sheets';
 
 import { defaultEditTakeItemProps, loadingStates, Loading } from './constants/students';
-import { defaultConnectionState } from '../services/constants/connection';
 import { defaultProgramName, defaultStudentData } from '../stores/constants/student-store';
 
 const Students = () => {
 	const styles = useStyles();
 	const [studentsStore, setStudentsStore] = useAtom(studentsState);
-	const [connectionState, setConnectionState] = useState<ConnectionState>(defaultConnectionState);
+	const [connectionStore, setConnectionStore] = useAtom(connectionState);
 	const isSettingsLoaded = useAtomValue(loadedSettings);
 	const googleSheetsStore = useAtomValue(googleSheetsSettings);
 	const xpnStore = useAtomValue(xpnSettings);
@@ -49,7 +47,10 @@ const Students = () => {
 		[studentsStore],
 	);
 	const nextIndex = useMemo(() => (studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1), [studentsStore]);
-	const googleSheetsData = useMemo(() => gsData(googleSheetsStore.GoogleSheetsID), [googleSheetsStore]);
+	const googleSheetsData = useMemo(() => {
+		if (connectionStore.connected) return gsData(googleSheetsStore.GoogleSheetsID);
+		return Promise.resolve({} as gsObject);
+	}, [connectionStore.connected, googleSheetsStore.GoogleSheetsID]);
 	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
@@ -650,17 +651,17 @@ const Students = () => {
 
 	const reloadData = useCallback(() => {
 		if (!isMounted.current) return;
-		if (connectionState !== undefined && connectionState.connected) {
-			clearGoogleCache(); // Clear the google sheets data cache before loading the students again
+		clearGoogleCache(); // Clear the google sheets data cache before loading the students again
+		if (connectionStore !== undefined && connectionStore.connected) {
 			getStudents();
 		}
-	}, [connectionState, getStudents]);
+	}, [connectionStore, getStudents]);
 
 	const onKeyDown = useCallback(
 		(event: React.KeyboardEvent<HTMLDivElement>) => {
 			if (!isMounted.current) return;
 
-			if (connectionState.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
+			if (connectionStore.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
 				if (!event.altKey && !event.shiftKey) {
 					switch (event.key) {
 						case 'ArrowLeft':
@@ -685,7 +686,7 @@ const Students = () => {
 			}
 		},
 		[
-			connectionState.connected,
+			connectionStore.connected,
 			goToLast,
 			goToNext,
 			studentsLength,
@@ -700,17 +701,17 @@ const Students = () => {
 		isMounted.current = true;
 
 		Emitter.on('network.connecting', (message: string) =>
-			setConnectionState({ connected: false, connecting: true, displayMsg: message }),
+			setConnectionStore({ connected: false, connecting: true, displayMsg: message }),
 		);
 		Emitter.on('network.connected', (message: string) =>
-			setConnectionState({ connected: true, connecting: false, displayMsg: message }),
+			setConnectionStore({ connected: true, connecting: false, displayMsg: message }),
 		);
 		Emitter.on('network.disconnected', (message: string) =>
-			setConnectionState({ connected: false, connecting: false, displayMsg: message }),
+			setConnectionStore({ connected: false, connecting: false, displayMsg: message }),
 		);
 
 		Emitter.on('conn.status', ({ connected = false, connecting = false, displayMsg = '' }) =>
-			setConnectionState({ connected, connecting, displayMsg }),
+			setConnectionStore({ connected, connecting, displayMsg }),
 		);
 
 		Emitter.on('xpression.loggedIn', () => {
@@ -726,7 +727,7 @@ const Students = () => {
 			Emitter.emit('conn.disconnect', {});
 			setTimeout(() => {
 				if (!isMounted.current) return;
-				setConnectionState({ connected: false, connecting: false, displayMsg: value.data.message });
+				setConnectionStore({ connected: false, connecting: false, displayMsg: value.data.message });
 			}, 1500);
 		});
 
@@ -747,7 +748,7 @@ const Students = () => {
 			setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, ctrlStarted: true }));
 
 			if (prevStudentsStore.current.ctrlStarted) {
-				getStudents();
+				if (connectionStore.connected) getStudents();
 				return;
 			} else prevStudentsStore.current = { ...prevStudentsStore.current, ctrlStarted: true };
 
@@ -776,7 +777,7 @@ const Students = () => {
 				takeID: TakeID,
 			});
 
-			getStudents();
+			if (connectionStore.connected) getStudents();
 		});
 
 		Emitter.emit('conn.getStatus', {});
@@ -838,8 +839,7 @@ const Students = () => {
 			</Grid>
 		);
 
-	if (!connectionState.connected)
-		return <NetworkConnection key={'students.NetworkConnection'} state={connectionState} />;
+	if (!connectionStore.connected) return <NetworkConnection key={'students.NetworkConnection'} />;
 
 	if (loadStatus.current === Loading.XPN_FAILED)
 		return (
