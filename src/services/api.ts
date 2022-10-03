@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export type Convocations = {
 	id: string;
 	title: string;
@@ -89,31 +91,17 @@ export const defaultConvocation: Convocation = {
 	updatedAt: new Date(),
 };
 
-const getData = async (url = '') => {
-	const response = await fetch(`${process.env.REACT_APP_API_URL}/${url}`, {
-		method: 'GET',
-		headers: { 'Content-Type': 'application/json; charset=utf-8' },
-		mode: 'no-cors',
-		credentials: 'omit',
-	});
-	return response.json();
-};
-
-const postData = async (url = '', data = {}) => {
-	const response = await fetch(`${process.env.REACT_APP_API_URL}/${url}`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json; charset=utf-8' },
-		mode: 'no-cors',
-		credentials: 'omit',
-		body: JSON.stringify(data),
-	});
-	return response.json();
-};
+export const axiosInstance = axios.create({
+	baseURL: `${process.env.REACT_APP_API_URL}`,
+	timeout: 1000,
+	headers: { 'Content-Type': 'application/json; charset=utf-8' },
+	withCredentials: false,
+});
 
 export const getLogin = async (username: string, password: string) => {
 	const {
 		data: { results },
-	} = await postData('/login', { username, password });
+	} = await axiosInstance.post('/login', { username, password });
 
 	return results?.success ?? false;
 };
@@ -121,7 +109,7 @@ export const getLogin = async (username: string, password: string) => {
 export const getConvocations = async () => {
 	const {
 		data: { results },
-	} = await getData('/convocations');
+	} = await axiosInstance.get('/convocations');
 
 	console.log('getConvocations results', results);
 
@@ -132,7 +120,7 @@ export const getConvocation = async (id: string) => {
 	console.log('getConvocation', id);
 	const {
 		data: { results },
-	} = await getData(`/convocation/${id}`);
+	} = await axiosInstance.get(`/convocation/${id}`);
 
 	console.log('getConvocation', results);
 	return { ...defaultConvocation, ...results } as Convocation;
@@ -142,7 +130,7 @@ export const getNetwork = async (id: string) => {
 	console.log('getNetwork', id);
 	const {
 		data: { results },
-	} = await getData(`/network/${id}`);
+	} = await axiosInstance.get(`/network/${id}`);
 
 	console.log('getNetwork', results);
 	return { ...defaultNetwork, ...results } as Network;
@@ -151,7 +139,7 @@ export const getNetwork = async (id: string) => {
 export const updateNetwork = async (data: Network) => {
 	const {
 		data: { results },
-	} = await postData(`/network/${data.id}`, { ...data });
+	} = await axiosInstance.post(`/network/${data.id}`, { ...data });
 
 	console.log('updateNetwork', results);
 
@@ -162,7 +150,7 @@ export const getGoogleSheet = async (id: string) => {
 	console.log('getGoogleSheet', id);
 	const {
 		data: { results },
-	} = await getData(`/googleSheet/${id}`);
+	} = await axiosInstance.get(`/googleSheet/${id}`);
 
 	console.log('getGoogleSheet', results);
 	return { ...defaultGoogleSheet, ...results } as GoogleSheets;
@@ -171,7 +159,7 @@ export const getGoogleSheet = async (id: string) => {
 export const updateGoogleSheet = async (data: GoogleSheets) => {
 	const {
 		data: { results },
-	} = await postData(`/googleSheet/${data.id}`, { ...data });
+	} = await axiosInstance.post(`/googleSheet/${data.id}`, { ...data });
 
 	console.log('updateGoogleSheet', results);
 
@@ -182,7 +170,7 @@ export const getXpression = async (id: string) => {
 	console.log('getXpression', id);
 	const {
 		data: { results },
-	} = await getData(`/xpression/${id}`);
+	} = await axiosInstance.get(`/xpression/${id}`);
 
 	console.log('getXpression', results);
 	return { ...defaultXpression, ...results } as Xpression;
@@ -191,7 +179,7 @@ export const getXpression = async (id: string) => {
 export const updateXpression = async (data: Xpression) => {
 	const {
 		data: { results },
-	} = await postData(`/xpression/${data.id}`, { ...data });
+	} = await axiosInstance.post(`/xpression/${data.id}`, { ...data });
 
 	console.log('updateXpression', results);
 
