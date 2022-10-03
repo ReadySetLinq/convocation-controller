@@ -3,35 +3,25 @@ import { Box, AppBar, Toolbar, Tab, Grid, Button } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { Field, Form, Formik, FormikHelpers } from 'formik';
-import bcrypt from 'bcryptjs';
 
-import { credentials } from './constants/main';
 import { TextFormField } from '../views/form-field';
 
+import { getLogin } from '../services/api';
 import { useStyles } from '../services/constants/styles';
 
-import { hashed } from './constants/login';
 import { initialLogin, LoginProps, LoginState } from './interface/login';
 
 const Login: React.FC<LoginProps> = ({ state, setState }) => {
 	const styles = useStyles();
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
-	const attempLogin = (username: string, password: string) => {
-		if (username === credentials.username) {
-			return bcrypt.compareSync(`${username}-${password}`, hashed);
-		} else {
-			return false;
-		}
-	};
-
 	const onLogin = useCallback(
-		(values: LoginState, actions: FormikHelpers<LoginState>) => {
+		async (values: LoginState, actions: FormikHelpers<LoginState>) => {
 			if (!isMounted.current) return;
 
 			actions.setSubmitting(true);
 
-			if (attempLogin(values.username, values.password)) {
+			if (await getLogin(values.username, values.password)) {
 				setState((oldState) => ({
 					...oldState,
 					loggedIn: true,

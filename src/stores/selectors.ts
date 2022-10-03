@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 
 import { sortBy, isEqual, isEmpty, filter } from 'lodash';
 
-import { settingsState, studentsState } from './atoms';
+import { settingsState, studentsState, connectionState } from './atoms';
 import { getDataValue } from '../services/utilities';
 import { clearGoogleCache } from '../services/google-sheets';
 
@@ -13,6 +13,27 @@ import { GoogleSheetsSettingsData } from '../components/settings/interfaces/goog
 import { NetworkSettingsData } from '../components/settings/interfaces/network';
 import { XpnSettingsData } from '../components/settings/interfaces/xpression';
 import { StudentsStoreState } from './interfaces/student-store';
+
+// Connection
+export const isConnected = atom((get) => get(connectionState).connected);
+
+export const isConnecting = atom((get) => get(connectionState).connecting);
+
+export const connectionMessage = atom((get) => get(connectionState).displayMsg);
+
+export const setConnected = atom(null, (get, set, item: boolean) => {
+	const data = item ? { connected: true, connecting: false } : { connected: false };
+	return set(connectionState, { ...get(connectionState), ...data });
+});
+
+export const setIsConnecting = atom(null, (get, set, item: boolean) => {
+	const data = item ? { connecting: true, connected: false } : { connecting: false };
+	return set(connectionState, { ...get(connectionState), ...data });
+});
+
+export const setConnectionMessage = atom(null, (get, set, item: string) =>
+	set(connectionState, { ...get(connectionState), ...{ displayMsg: item } }),
+);
 
 // Settings
 export const loadedSettings = atom((get) => get(settingsState).loaded);
@@ -52,7 +73,7 @@ export const studentsFromProgram = atom((get) => {
 	const { Extra_Column } = get(settingsState).gs;
 
 	if (students.length === 0) return [];
-	if (Extra_Column === undefined || Extra_Column.trim().length === 0) return [];
+	if (Extra_Column === null || Extra_Column.trim().length === 0) return [];
 
 	return filter(students, (student) => {
 		return isEqual(program.toString(), getDataValue(student, Extra_Column));
@@ -69,7 +90,7 @@ export const getProgramStudents = atom((get) => {
 	const filteredStudents = get(studentsFromProgram);
 
 	if (isEmpty(filteredStudents)) return [];
-	if (isEmpty(OrderBy) || OrderBy === undefined) return sortBy(filteredStudents, 'gs_id');
+	if (isEmpty(OrderBy) || OrderBy === null) return sortBy(filteredStudents, 'gs_id');
 
 	return sortBy(filteredStudents, OrderBy.split(','));
 });

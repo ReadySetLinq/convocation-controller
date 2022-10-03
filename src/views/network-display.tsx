@@ -1,29 +1,34 @@
 import React, { useCallback } from 'react';
+import { useAtomValue } from 'jotai';
 import { Button } from '@material-ui/core';
 
 import Emitter from '../services/emitter';
+import { isConnected, isConnecting } from '../stores/selectors';
 
 import { NetworkDisplayProps } from './interfaces/network-display';
 
-const NetworkDisplay: React.FC<NetworkDisplayProps> = ({ size, state }) => {
+const NetworkDisplay: React.FC<NetworkDisplayProps> = ({ size }) => {
+	const isConnectedStore = useAtomValue(isConnected);
+	const isConnectingStore = useAtomValue(isConnecting);
+
 	const handleConnect = useCallback(() => {
-		if (!state.connected) {
+		if (!isConnectedStore) {
 			Emitter.emit('conn.connect', {});
 		}
-	}, [state.connected]);
+	}, [isConnectedStore]);
 
 	const handleDisconnect = useCallback(() => {
-		if (state.connected || state.connecting) Emitter.emit('conn.disconnect', {});
-	}, [state.connected, state.connecting]);
+		if (isConnectedStore || isConnectingStore) Emitter.emit('conn.disconnect', {});
+	}, [isConnectedStore, isConnectingStore]);
 
-	if (state.connecting) {
+	if (isConnectingStore) {
 		return (
 			<Button
 				variant='outlined'
 				color='inherit'
 				title='Click to cancel'
 				aria-label='Connecting...'
-				hidden={!state.connecting}
+				hidden={!isConnectingStore}
 				onClick={handleDisconnect}
 				type='submit'
 				size={size}
@@ -31,7 +36,7 @@ const NetworkDisplay: React.FC<NetworkDisplayProps> = ({ size, state }) => {
 				Connecting...
 			</Button>
 		);
-	} else if (state.connected) {
+	} else if (isConnectedStore) {
 		return (
 			<Button
 				variant='contained'
@@ -40,7 +45,7 @@ const NetworkDisplay: React.FC<NetworkDisplayProps> = ({ size, state }) => {
 				onClick={handleDisconnect}
 				type='submit'
 				size={size}
-				hidden={!state.connected}
+				hidden={!isConnectedStore}
 			>
 				Disconnect
 			</Button>
@@ -55,7 +60,7 @@ const NetworkDisplay: React.FC<NetworkDisplayProps> = ({ size, state }) => {
 			onClick={handleConnect}
 			type='submit'
 			size={size}
-			hidden={state.connecting || state.connected}
+			hidden={isConnectingStore || isConnectedStore}
 		>
 			Connect
 		</Button>

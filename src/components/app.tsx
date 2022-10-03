@@ -4,7 +4,7 @@ import { ThemeProvider } from '@material-ui/core';
 import { themeState } from '../stores/atoms';
 import { lightTheme, darkTheme } from '../services/constants/styles';
 import ErrorBoundary from '../views/boundaries';
-import Main from './main';
+import Display from './display';
 
 const App = () => {
 	const themeStore = useAtomValue(themeState);
@@ -12,7 +12,7 @@ const App = () => {
 	return (
 		<ThemeProvider theme={themeStore.theme === 'light' ? lightTheme() : darkTheme()}>
 			<ErrorBoundary>
-				<Main />
+				<Display />
 			</ErrorBoundary>
 		</ThemeProvider>
 	);

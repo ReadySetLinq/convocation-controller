@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
 import { Grid, Button, Paper } from '@material-ui/core';
@@ -6,7 +6,7 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import { isEqual, isEmpty, sortBy, filter, findIndex } from 'lodash';
 import { generate } from 'shortid';
 
-import { studentsState } from '../stores/atoms';
+import { connectionState, studentsState } from '../stores/atoms';
 import {
 	loadedSettings,
 	googleSheetsSettings,
@@ -26,18 +26,16 @@ import { StudentDisplay, ProgramsDisplay, OnlineButtonsDisplay } from '../views/
 // Import Interfaces
 import { StudentData, StudentsStoreState } from '../stores/interfaces/student-store';
 import { editTakeItemProps } from './interface/students';
-import { ConnectionState } from '../services/interfaces/connection';
 import { XPN_TakeItem_Data } from '../services/interfaces/xpn-events';
 import { gsObject } from '../services/interfaces/google-sheets';
 
 import { defaultEditTakeItemProps, loadingStates, Loading } from './constants/students';
-import { defaultConnectionState } from '../services/constants/connection';
 import { defaultProgramName, defaultStudentData } from '../stores/constants/student-store';
 
 const Students = () => {
 	const styles = useStyles();
 	const [studentsStore, setStudentsStore] = useAtom(studentsState);
-	const [connectionState, setConnectionState] = useState<ConnectionState>(defaultConnectionState);
+	const [connectionStore, setConnectionStore] = useAtom(connectionState);
 	const isSettingsLoaded = useAtomValue(loadedSettings);
 	const googleSheetsStore = useAtomValue(googleSheetsSettings);
 	const xpnStore = useAtomValue(xpnSettings);
@@ -49,7 +47,10 @@ const Students = () => {
 		[studentsStore],
 	);
 	const nextIndex = useMemo(() => (studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1), [studentsStore]);
-	const googleSheetsData = useMemo(() => gsData(googleSheetsStore.GoogleSheetsID), [googleSheetsStore]);
+	const googleSheetsData = useMemo(() => {
+		if (connectionStore.connected) return gsData(googleSheetsStore.GoogleSheetsID);
+		return Promise.resolve({} as gsObject);
+	}, [connectionStore.connected, googleSheetsStore.GoogleSheetsID]);
 	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
@@ -77,12 +78,12 @@ const Students = () => {
 					: String(getDataValue(student, Name_Column)).replace('*', '').trim();
 
 			const _extra =
-				isEmpty(Extra) || isEmpty(Extra_Column)
+				isEmpty(Extra) || isEmpty(Extra_Column) || Extra_Column == null
 					? defaultStudentData.extra
 					: String(getDataValue(student, Extra_Column)).replace('*', '').trim();
 
 			const _multiplier = Number.parseInt(
-				isEmpty(Multiplier) || isEmpty(Multiplier_Column)
+				isEmpty(Multiplier) || isEmpty(Multiplier_Column) || Multiplier_Column == null
 					? defaultStudentData.multiplier
 					: getDataValue(student, Multiplier_Column),
 			);
@@ -348,7 +349,7 @@ const Students = () => {
 					!isEmpty(students[nextIndex]) &&
 					!isEmpty(Background) &&
 					!isEmpty(Division_Column) &&
-					Division_Column !== undefined &&
+					Division_Column !== null &&
 					!isEmpty(students[nextIndex][Division_Column])
 				) {
 					// Edit the background
@@ -435,8 +436,8 @@ const Students = () => {
 					let gs_id = 0;
 					response.data.forEach((student: any) => {
 						if (!isMounted.current) return;
-						const _studentsProgram = getDataValue(student, Extra_Column);
-						const _studentsDivision = getDataValue(student, Division_Column);
+						const _studentsProgram = getDataValue(student, Extra_Column ?? '');
+						const _studentsDivision = getDataValue(student, Division_Column ?? '');
 
 						// used to keep the id order of the default GoogleSheets import
 						student['gs_id'] = gs_id;
@@ -448,15 +449,15 @@ const Students = () => {
 							}
 						}
 
-						if (Extra_Column !== undefined) {
+						if (Extra_Column !== null) {
 							if (isEmpty(student[Extra_Column])) student[Extra_Column] = _studentsProgram;
 						}
 
-						if (!isEmpty(_studentsDivision) && Division_Column !== undefined) {
+						if (!isEmpty(_studentsDivision) && Division_Column !== null) {
 							if (isEmpty(student[Division_Column])) student[Division_Column] = _studentsDivision;
 						}
 
-						if (!isEmpty(Multiplier) && !isEmpty(Multiplier_Column)) {
+						if (!isEmpty(Multiplier) && !isEmpty(Multiplier_Column) && Extra_Column !== null) {
 							// Check for people with the same name and get count
 							const _curName = getDataValue(student, Name_Column);
 							const _studentID = getDataValue(student, StudentID);
@@ -468,7 +469,7 @@ const Students = () => {
 								);
 							}).length;
 
-							if (_multiple === 1 && Multiplier_Column !== undefined) {
+							if (_multiple === 1 && Multiplier_Column !== null) {
 								// If this is the first duplicate, add multiplier 1 to the original name
 								const _idx = findIndex(_students, (s: any) => {
 									return (
@@ -481,7 +482,7 @@ const Students = () => {
 								if (_idx !== -1 && _students[_idx]) _students[_idx][Multiplier_Column] = 1;
 							}
 
-							if (Multiplier_Column !== undefined) student[Multiplier_Column] = _multiple === 0 ? 0 : _multiple + 1;
+							if (Multiplier_Column !== null) student[Multiplier_Column] = _multiple === 0 ? 0 : _multiple + 1;
 						}
 
 						// Add new student
@@ -489,7 +490,7 @@ const Students = () => {
 					});
 
 					// OrderBy on our end to make sure its correct as a failsafe
-					if (!isEmpty(OrderBy) && OrderBy !== undefined) _students = sortBy(_students, [...OrderBy.split(',')]);
+					if (!isEmpty(OrderBy) && OrderBy !== null) _students = sortBy(_students, [...OrderBy.split(',')]);
 					else _students = sortBy(_students, 'gs_id');
 
 					if (!isMounted.current) return;
@@ -650,17 +651,17 @@ const Students = () => {
 
 	const reloadData = useCallback(() => {
 		if (!isMounted.current) return;
-		if (connectionState !== undefined && connectionState.connected) {
-			clearGoogleCache(); // Clear the google sheets data cache before loading the students again
+		clearGoogleCache(); // Clear the google sheets data cache before loading the students again
+		if (connectionStore !== undefined && connectionStore.connected) {
 			getStudents();
 		}
-	}, [connectionState, getStudents]);
+	}, [connectionStore, getStudents]);
 
 	const onKeyDown = useCallback(
 		(event: React.KeyboardEvent<HTMLDivElement>) => {
 			if (!isMounted.current) return;
 
-			if (connectionState.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
+			if (connectionStore.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
 				if (!event.altKey && !event.shiftKey) {
 					switch (event.key) {
 						case 'ArrowLeft':
@@ -685,7 +686,7 @@ const Students = () => {
 			}
 		},
 		[
-			connectionState.connected,
+			connectionStore.connected,
 			goToLast,
 			goToNext,
 			studentsLength,
@@ -700,17 +701,17 @@ const Students = () => {
 		isMounted.current = true;
 
 		Emitter.on('network.connecting', (message: string) =>
-			setConnectionState({ connected: false, connecting: true, displayMsg: message }),
+			setConnectionStore({ connected: false, connecting: true, displayMsg: message }),
 		);
 		Emitter.on('network.connected', (message: string) =>
-			setConnectionState({ connected: true, connecting: false, displayMsg: message }),
+			setConnectionStore({ connected: true, connecting: false, displayMsg: message }),
 		);
 		Emitter.on('network.disconnected', (message: string) =>
-			setConnectionState({ connected: false, connecting: false, displayMsg: message }),
+			setConnectionStore({ connected: false, connecting: false, displayMsg: message }),
 		);
 
 		Emitter.on('conn.status', ({ connected = false, connecting = false, displayMsg = '' }) =>
-			setConnectionState({ connected, connecting, displayMsg }),
+			setConnectionStore({ connected, connecting, displayMsg }),
 		);
 
 		Emitter.on('xpression.loggedIn', () => {
@@ -726,7 +727,7 @@ const Students = () => {
 			Emitter.emit('conn.disconnect', {});
 			setTimeout(() => {
 				if (!isMounted.current) return;
-				setConnectionState({ connected: false, connecting: false, displayMsg: value.data.message });
+				setConnectionStore({ connected: false, connecting: false, displayMsg: value.data.message });
 			}, 1500);
 		});
 
@@ -747,7 +748,7 @@ const Students = () => {
 			setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, ctrlStarted: true }));
 
 			if (prevStudentsStore.current.ctrlStarted) {
-				getStudents();
+				if (connectionStore.connected) getStudents();
 				return;
 			} else prevStudentsStore.current = { ...prevStudentsStore.current, ctrlStarted: true };
 
@@ -776,7 +777,7 @@ const Students = () => {
 				takeID: TakeID,
 			});
 
-			getStudents();
+			if (connectionStore.connected) getStudents();
 		});
 
 		Emitter.emit('conn.getStatus', {});
@@ -838,8 +839,7 @@ const Students = () => {
 			</Grid>
 		);
 
-	if (!connectionState.connected)
-		return <NetworkConnection key={'students.NetworkConnection'} state={connectionState} />;
+	if (!connectionStore.connected) return <NetworkConnection key={'students.NetworkConnection'} />;
 
 	if (loadStatus.current === Loading.XPN_FAILED)
 		return (

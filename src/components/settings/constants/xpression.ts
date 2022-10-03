@@ -3,6 +3,7 @@ import * as yup from 'yup';
 import { XpnSettingsData } from '../interfaces/xpression';
 
 export const defaultXpnSettingsData: XpnSettingsData = {
+	id: '',
 	tmrDelay: 250,
 	ExtraTakeID: 1,
 	TakeID: 2,
@@ -14,6 +15,7 @@ export const defaultXpnSettingsData: XpnSettingsData = {
 
 export const xpnSettingsSchema: yup.ObjectSchema<XpnSettingsData> = yup
 	.object({
+		id: yup.string().default(defaultXpnSettingsData.id).defined(),
 		tmrDelay: yup
 			.number()
 			.integer('Timer Delay must be a number!')

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
 
-import { MainState } from '../interface/main';
+import { DisplayState } from '../interface/display';
 
 export type LoginState = {
 	username: string;
@@ -13,6 +13,6 @@ export const initialLogin: LoginState = {
 };
 
 export type LoginProps = {
-	state: MainState;
-	setState: Dispatch<SetStateAction<MainState>>;
+	state: DisplayState;
+	setState: Dispatch<SetStateAction<DisplayState>>;
 };

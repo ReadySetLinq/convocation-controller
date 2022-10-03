@@ -16,6 +16,7 @@ export class Websockets {
 	connectTimeout: number = 0;
 	status: StatusType = { autoReconnect: true, connecting: false, connected: false };
 	data: NetworkSettingsData = {
+		id: defaultNetworkSettingsData.id,
 		ip: defaultNetworkSettingsData.ip,
 		port: defaultNetworkSettingsData.port,
 		userName: defaultNetworkSettingsData.userName,

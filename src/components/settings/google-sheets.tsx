@@ -8,15 +8,6 @@ const GoogleSheetsSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmittin
 	return (
 		<Fragment>
 			<Field
-				name='gs.API_Key'
-				id={`gs.API_Key-${generate()}`}
-				label='Google API Key'
-				placeholder='The API Key for google'
-				disabled={isSubmitting}
-				component={TextFormField}
-			/>
-
-			<Field
 				name='gs.GoogleSheetsID'
 				id={`gs.GoogleSheetsID-${generate()}`}
 				label='Spreadsheet ID'

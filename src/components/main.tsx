@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Box, AppBar, Toolbar, Tab } from '@material-ui/core';
 import { TabContext, TabPanel, TabList } from '@material-ui/lab';
@@ -7,36 +8,41 @@ import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
 import Brightness6 from '@material-ui/icons/Brightness6';
 import Brightness7 from '@material-ui/icons/Brightness7';
 
-import { themeState } from '../stores/atoms';
+import { themeState, convocationState } from '../stores/atoms';
 import {
 	loadedSettings,
 	setLoadedSettings,
+	googleSheetsSettings,
 	setGoogleSheetsSettings,
+	networkSettings,
 	setNetworkSettings,
+	xpnSettings,
 	setXPNSettings,
 } from '../stores/selectors';
 
 import Emitter from '../services/emitter';
 import Storage from '../services/storage';
 import { useStyles } from '../services/constants/styles';
-import { StorageLoad } from '../services/interfaces/storage';
 import { defaultSettingKeys } from '../services/constants/storage';
+import { defaultConvocation, getConvocation } from '../services/api';
 
 import Students from './students';
 import Settings from './settings/settings';
 import { initialMainState } from './constants/main';
 
 import LoadingSpinner from '../views/loading-spinner';
-import Login from './login';
 
 import { ThemeTypesData } from '../stores/interfaces/theme-store';
-import { SettingsStoreState } from './settings/interfaces/settings';
 import { MainState } from './interface/main';
 
 const Main = () => {
 	const styles = useStyles();
 	const [state, setState] = useState<MainState>(initialMainState);
-	const isSettingsLoaded = useAtomValue(loadedSettings);
+	const isSettingsStoreLoaded = useAtomValue(loadedSettings);
+	const convocationStore = useAtomValue(convocationState);
+	const googleSheetsStore = useAtomValue(googleSheetsSettings);
+	const xpnStore = useAtomValue(xpnSettings);
+	const networkStore = useAtomValue(networkSettings);
 	const setGoogleSheetsStore = useSetAtom(setGoogleSheetsSettings);
 	const setXPNStore = useSetAtom(setXPNSettings);
 	const setNetworkStore = useSetAtom(setNetworkSettings);
@@ -50,6 +56,13 @@ const Main = () => {
 		) : (
 			<Brightness7 className={styles.iconButton} />
 		);
+	const {
+		isLoading,
+		data: convocationQuery,
+		isFetching,
+	} = useQuery(['getConvocation', convocationStore.id], () => getConvocation(convocationStore.id), {
+		enabled: convocationStore.id !== defaultConvocation.id && !isSettingsStoreLoaded,
+	});
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
 	const handleThemeToggle = useCallback(() => {
@@ -67,35 +80,30 @@ const Main = () => {
 		[handleThemeToggle],
 	);
 
-	const handleLoadData = useCallback(() => {
-		if (!isMounted.current || isSettingsLoaded) return;
+	useEffect(() => {
+		if (!isMounted.current || isSettingsStoreLoaded) return;
 
-		Storage.loadSettings()
-			.then((response: SettingsStoreState) => {
-				if (!isMounted.current) return;
-				setGoogleSheetsStore(response.gs);
-				setXPNStore(response.xpn);
-				setNetworkStore(response.network);
-			})
-			.catch((e: any) => {
-				console.error({ ...e });
-			})
-			.finally(() => {
-				if (isMounted.current) setLoadedStore(true);
-			});
-	}, [setGoogleSheetsStore, setLoadedStore, setNetworkStore, setXPNStore, isSettingsLoaded]);
-
-	const handleLoadTheme = useCallback(() => {
-		if (!isMounted.current || themeStore.loaded) return;
-
-		Storage.loadData(defaultSettingKeys.Theme)
-			.then((response: StorageLoad) => {
-				if (isMounted.current) setThemeStore((oldStore) => ({ ...oldStore, ...response.data }));
-			})
-			.catch((e) => {
-				if (!e.error || e.error !== 'not found') console.error(e);
-			});
-	}, [setThemeStore, themeStore]);
+		if (!isLoading && !isFetching && convocationQuery !== undefined) {
+			const { googleSheet, xpression, network } = convocationQuery;
+			console.log('convocationQuery', convocationQuery);
+			if (googleSheet !== googleSheetsStore) setGoogleSheetsStore({ ...googleSheetsStore, ...googleSheet });
+			if (xpression !== xpnStore) setXPNStore({ ...xpnStore, ...xpression });
+			if (network !== networkStore) setNetworkStore({ ...networkStore, ...network });
+			setLoadedStore(true);
+		}
+	}, [
+		convocationQuery,
+		googleSheetsStore,
+		isFetching,
+		isLoading,
+		isSettingsStoreLoaded,
+		networkStore,
+		setGoogleSheetsStore,
+		setLoadedStore,
+		setNetworkStore,
+		setXPNStore,
+		xpnStore,
+	]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -106,8 +114,6 @@ const Main = () => {
 
 		if (isMounted.current) {
 			Emitter.emit('navTabs_onSelect', state.navActiveKey);
-			handleLoadData();
-			handleLoadTheme();
 		}
 
 		// componentWillUnmount
@@ -119,9 +125,7 @@ const Main = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	if (!themeStore || !isSettingsLoaded) return <LoadingSpinner color='secondary' />;
-
-	if (!state.loggedIn) return <Login state={state} setState={setState} />;
+	if (isLoading || isFetching || convocationQuery === undefined) return <LoadingSpinner label='Loading Settings...' />;
 
 	return (
 		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
