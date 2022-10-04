@@ -21,6 +21,7 @@ const NetworkSettings: React.FC<{ isSubmitting: boolean }> = ({ isSubmitting = f
 				id={`port-${generate()}`}
 				label='Port'
 				placeholder='Port for connecting to Xpression'
+				type='number'
 				disabled={isSubmitting}
 				component={TextFormField}
 			/>

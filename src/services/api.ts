@@ -111,8 +111,6 @@ export const getConvocations = async () => {
 		data: { results },
 	} = await axiosInstance.get('/convocations');
 
-	console.log('getConvocations results', results);
-
 	return [...results] as Convocations[];
 };
 
@@ -122,7 +120,6 @@ export const getConvocation = async (id: string) => {
 		data: { results },
 	} = await axiosInstance.get(`/convocation/${id}`);
 
-	console.log('getConvocation', results);
 	return { ...defaultConvocation, ...results } as Convocation;
 };
 
@@ -132,7 +129,6 @@ export const getNetwork = async (id: string) => {
 		data: { results },
 	} = await axiosInstance.get(`/network/${id}`);
 
-	console.log('getNetwork', results);
 	return { ...defaultNetwork, ...results } as Network;
 };
 
@@ -140,8 +136,6 @@ export const updateNetwork = async (data: Network) => {
 	const {
 		data: { results },
 	} = await axiosInstance.post(`/network/${data.id}`, { ...data });
-
-	console.log('updateNetwork', results);
 
 	return { ...defaultNetwork, ...results } as Network;
 };
@@ -152,7 +146,6 @@ export const getGoogleSheet = async (id: string) => {
 		data: { results },
 	} = await axiosInstance.get(`/googleSheet/${id}`);
 
-	console.log('getGoogleSheet', results);
 	return { ...defaultGoogleSheet, ...results } as GoogleSheets;
 };
 
@@ -160,8 +153,6 @@ export const updateGoogleSheet = async (data: GoogleSheets) => {
 	const {
 		data: { results },
 	} = await axiosInstance.post(`/googleSheet/${data.id}`, { ...data });
-
-	console.log('updateGoogleSheet', results);
 
 	return { ...defaultGoogleSheet, ...results } as GoogleSheets;
 };
@@ -172,7 +163,6 @@ export const getXpression = async (id: string) => {
 		data: { results },
 	} = await axiosInstance.get(`/xpression/${id}`);
 
-	console.log('getXpression', results);
 	return { ...defaultXpression, ...results } as Xpression;
 };
 
@@ -180,8 +170,6 @@ export const updateXpression = async (data: Xpression) => {
 	const {
 		data: { results },
 	} = await axiosInstance.post(`/xpression/${data.id}`, { ...data });
-
-	console.log('updateXpression', results);
 
 	return { ...defaultXpression, ...results } as Xpression;
 };
