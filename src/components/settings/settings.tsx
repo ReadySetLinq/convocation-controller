@@ -1,9 +1,10 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useMutation } from '@tanstack/react-query';
-import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
+import { AxiosError } from 'axios';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { isEqual } from 'lodash';
+import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
 
 import {
 	loadedSettings,
@@ -22,11 +23,22 @@ import { TabPanel, a11yProps } from '../../views/tab-panel';
 import LoadingSpinner from '../../views/loading-spinner';
 
 import { settingsSchema } from './constants/settings';
-import { clearGoogleCache } from '../../services/google-sheets';
 import { updateNetwork, updateGoogleSheet, updateXpression } from '../../services/api';
 
 // Import Interfaces
 import { SettingsState } from './interfaces/settings';
+
+type errorType = {
+	network?: string;
+	googleSheets?: string;
+	xpression?: string;
+};
+
+const defaultErrorType: errorType = {
+	network: undefined,
+	googleSheets: undefined,
+	xpression: undefined,
+};
 
 const Settings = () => {
 	const styles = useStyles();
@@ -46,6 +58,7 @@ const Settings = () => {
 	const networkMutation = useMutation(updateNetwork);
 	const googleSheetMutation = useMutation(updateGoogleSheet);
 	const xpressionMutation = useMutation(updateXpression);
+	const [submitErrors, setsubmitErrors] = useState<errorType>(defaultErrorType);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
 	const hasChanged = useCallback(
@@ -78,16 +91,17 @@ const Settings = () => {
 
 			// Only save if values changed
 			let updatedValues = [];
+			let submittedError: errorType = { ...defaultErrorType };
 
 			if (!isEqual(values.gs, googleSheetsStore)) {
 				updatedValues.push(
 					googleSheetMutation.mutate(values.gs, {
-						onSettled: (data, _error, variables) => {
+						onSettled: (data, error, _variables) => {
 							if (!isMounted.current) return;
-							if (data?.GoogleSheetsID !== googleSheetsStore.GoogleSheetsID) {
-								clearGoogleCache();
-							}
-							setGoogleSheetsStore(data ?? variables);
+							if (!data || error) {
+								if (error) submittedError.googleSheets = (error as unknown as AxiosError).message;
+								values.gs = { ...googleSheetsStore };
+							} else setGoogleSheetsStore(data);
 						},
 					}),
 				);
@@ -96,9 +110,12 @@ const Settings = () => {
 			if (!isEqual(values.xpn, xpnStore)) {
 				updatedValues.push(
 					xpressionMutation.mutate(values.xpn, {
-						onSettled: (data, _error, variables) => {
+						onSettled: (data, error, _variables) => {
 							if (!isMounted.current) return;
-							setXPNStore(data ?? variables);
+							if (!data || error) {
+								if (error) submittedError.xpression = (error as unknown as AxiosError).message;
+								values.xpn = { ...xpnStore };
+							} else setXPNStore(data);
 						},
 					}),
 				);
@@ -107,9 +124,12 @@ const Settings = () => {
 			if (!isEqual(values.network, networkStore)) {
 				updatedValues.push(
 					networkMutation.mutate(values.network, {
-						onSettled: (data, _error, variables) => {
+						onSettled: (data, error, _variables) => {
 							if (!isMounted.current) return;
-							setNetworkStore(data ?? variables);
+							if (!data || error) {
+								if (error) submittedError.network = (error as unknown as AxiosError).message;
+								values.network = { ...networkStore };
+							} else setNetworkStore(data);
 						},
 					}),
 				);
@@ -120,6 +140,7 @@ const Settings = () => {
 				actions.setStatus();
 				actions.setSubmitting(false);
 				actions.resetForm({ values });
+				setsubmitErrors(submittedError);
 			});
 		},
 		[
@@ -156,7 +177,7 @@ const Settings = () => {
 								network: {
 									changed:
 										touched.network !== undefined && !isEqual(initialSettings.network, values.network) ? '* ' : '',
-									error: errors.network !== undefined ? ' - Error' : '',
+									error: errors.network !== undefined || errors.network !== undefined ? ' - Error' : '',
 								},
 								gs: {
 									changed: touched.gs !== undefined && !isEqual(initialSettings.gs, values.gs) ? '* ' : '',
@@ -167,6 +188,15 @@ const Settings = () => {
 									error: errors.xpn !== undefined ? ' - Error' : '',
 								},
 							};
+
+							if (
+								hasChanged(values) &&
+								(submitErrors.network !== undefined ||
+									submitErrors.googleSheets !== undefined ||
+									submitErrors.xpression !== undefined)
+							) {
+								setsubmitErrors({ ...defaultErrorType });
+							}
 
 							return (
 								<Form>
@@ -217,6 +247,19 @@ const Settings = () => {
 												/>
 											</Tabs>
 											<Paper>
+												<div>
+													{submitErrors.network && (
+														<p className={styles.errorText}>Error saving Network changes: {submitErrors.network}</p>
+													)}
+													{submitErrors.googleSheets && (
+														<p className={styles.errorText}>
+															Error saving GoogleSheets changes: {submitErrors.googleSheets}
+														</p>
+													)}
+													{submitErrors.xpression && (
+														<p className={styles.errorText}>Error saving Xpression changes: {submitErrors.xpression}</p>
+													)}
+												</div>
 												<TabPanel value={tabIndex} index={0}>
 													<NetworkSettings key={'settings.NetworkSettings'} isSubmitting={isSubmitting} />
 												</TabPanel>
