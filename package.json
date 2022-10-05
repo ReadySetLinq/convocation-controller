@@ -1,6 +1,6 @@
 {
 	"name": "convocation-controller",
-	"version": "2.1.3",
+	"version": "2.1.4",
 	"description": "A simple client controller for managing name readings for post-secondary convocations.",
 	"scripts": {
 		"serve": "serve -s build",
