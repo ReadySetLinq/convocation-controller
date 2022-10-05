@@ -1,9 +1,9 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import { useSetAtom, useAtomValue } from 'jotai';
 import { useQuery } from '@tanstack/react-query';
-import { Box, AppBar, Toolbar, Tab, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { Box, AppBar, Toolbar, Tab, MenuItem, Select, SelectChangeEvent, FormControl, InputLabel } from '@mui/material';
 import { TabContext, TabPanel, TabList } from '@mui/lab';
-import SettingsIcon from '@mui/icons-material/Settings';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 import { convocationState } from '../stores/atoms';
 import { defaultConvocationStoreState } from '../stores/constants/convocation-store';
@@ -15,6 +15,7 @@ import { ConvocationStoreState } from '../stores/interfaces/convocation-store';
 
 export const ConvocationSelector = () => {
 	const { classes } = useStyles();
+	const convocation = useAtomValue(convocationState);
 	const setConvocation = useSetAtom(convocationState);
 	const { isLoading, error, data, isFetching } = useQuery(['getConvocations'], getConvocations, {
 		refetchOnWindowFocus: false,
@@ -36,7 +37,6 @@ export const ConvocationSelector = () => {
 
 	useEffect(() => {
 		if (!isMounted.current) return;
-		console.log('getConvocations data', data);
 
 		if (data === undefined || data.length <= 0) {
 			setConvocation({ ...defaultConvocationStoreState });
@@ -58,7 +58,7 @@ export const ConvocationSelector = () => {
 
 	return (
 		<Box color='text.primary' bgcolor='background.paper' className={classes.boxWrapper} flexGrow={1} height='200vh'>
-			<TabContext value='login'>
+			<TabContext value='convocation'>
 				<AppBar position='static' color='inherit' className={classes.appBar}>
 					<Toolbar>
 						<div className={classes.fullWidth}>
@@ -74,29 +74,21 @@ export const ConvocationSelector = () => {
 						</div>
 					</Toolbar>
 				</AppBar>
-				<TabPanel value='login'>
-					<div className={classes.fullWidth}>
-						<div className={classes.errorText}>{error ?? error}</div>
-						<Select fullWidth onChange={handleChange}>
-							{data.map((item: ConvocationStoreState) => (
-								<MenuItem key={`selectFormField-${item.id}`} value={item.id}>
-									{item.title}
-								</MenuItem>
-							))}
-						</Select>
 				<TabPanel value='convocation'>
-					<div className={styles.fullWidth}>
-						{error && <div className={styles.errorText}>Error: {JSON.stringify(error)}</div>}
-						<FormControl fullWidth className={styles.formControl}>
-							<InputLabel id='convocation-selector-input-label'>Select</InputLabel>
-							<Select fullWidth labelId='convocation-selector' id='convocation-selector' onChange={handleChange}>
-								{data.map((item: ConvocationStoreState) => (
-									<MenuItem key={`selectFormField-${item.id}`} value={item.id}>
-										{item.title}
-									</MenuItem>
-								))}
-							</Select>
-						</FormControl>
+					<div className={classes.fullWidth}>
+						<>
+							{error && <div className={classes.errorText}>Error: {JSON.stringify(error)}</div>}
+							<FormControl fullWidth className={classes.formControl}>
+								<InputLabel id='convocation-selector-input-label'>Select</InputLabel>
+								<Select fullWidth labelId='convocation-selector' id='convocation-selector' onChange={handleChange}>
+									{data.map((item: ConvocationStoreState) => (
+										<MenuItem key={`selectFormField-${item.id}`} value={item.id}>
+											{item.title}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</>
 					</div>
 				</TabPanel>
 			</TabContext>

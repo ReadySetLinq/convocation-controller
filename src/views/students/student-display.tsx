@@ -35,7 +35,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	const studentsLength = useAtomValue(getProgramStudentsLength);
 	const [searchError, setSearchError] = useState('');
 	const [page, setPage] = useState(0);
-	const rowsPerPage = 10;
+	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const nextIndex = studentsStore.selectedIndex + 1;
 	const selectedStudent = getStudentData(students[studentsStore.selectedIndex]);
 	let prevStudentsStore = useRef(studentsStore);
@@ -126,6 +126,11 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 		setPage(newPage);
 	}, []);
 
+	const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		setRowsPerPage(parseInt(event.target.value, 10));
+		setPage(0);
+	}, []);
+
 	useEffect(() => {
 		// Make sure we are always on the correct page based on the new selected index
 		if (studentsStore.selectedIndex === -1) {
@@ -169,7 +174,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 								<Button
 									id={`DecreaseIndex-${generate()}`}
 									variant='text'
-									color={studentsStore.switching ? 'default' : 'secondary'}
+									color={studentsStore.switching ? 'primary' : 'secondary'}
 									size='small'
 									name='DecreaseIndex'
 									aria-label='Decrease Index'
@@ -185,7 +190,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 								<Button
 									id={`IncreaseIndex-${generate()}`}
 									variant='text'
-									color={studentsStore.switching ? 'default' : 'primary'}
+									color={studentsStore.switching ? 'secondary' : 'primary'}
 									size='small'
 									name='IncreaseIndex'
 									aria-label='Increase Index'
@@ -220,7 +225,7 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 								<Button
 									id={`SelectedIndexSearch-${generate()}`}
 									variant='outlined'
-									color={studentsStore.switching ? 'default' : 'primary'}
+									color={studentsStore.switching ? 'secondary' : 'primary'}
 									size='small'
 									name='SelectedIndexSearch'
 									aria-label='Search'
@@ -271,17 +276,19 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 					<TableFooter>
 						<TableRow>
 							<TablePagination
-								component='div'
-								rowsPerPageOptions={[10]}
+								rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
 								colSpan={3}
 								count={studentsLength}
 								rowsPerPage={rowsPerPage}
 								page={page}
 								SelectProps={{
-									inputProps: { 'aria-label': 'rows per page' },
+									inputProps: {
+										'aria-label': 'rows per page',
+									},
 									native: true,
 								}}
-								onChangePage={handleChangePage}
+								onPageChange={handleChangePage}
+								onRowsPerPageChange={handleChangeRowsPerPage}
 								ActionsComponent={PaginationTableActions}
 							/>
 						</TableRow>

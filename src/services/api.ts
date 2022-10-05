@@ -115,7 +115,6 @@ export const getConvocations = async () => {
 };
 
 export const getConvocation = async (id: string) => {
-	console.log('getConvocation', id);
 	const {
 		data: { results },
 	} = await axiosInstance.get(`/convocation/${id}`);
@@ -124,7 +123,6 @@ export const getConvocation = async (id: string) => {
 };
 
 export const getNetwork = async (id: string) => {
-	console.log('getNetwork', id);
 	const {
 		data: { results },
 	} = await axiosInstance.get(`/network/${id}`);
@@ -141,7 +139,6 @@ export const updateNetwork = async (data: Network) => {
 };
 
 export const getGoogleSheet = async (id: string) => {
-	console.log('getGoogleSheet', id);
 	const {
 		data: { results },
 	} = await axiosInstance.get(`/googleSheet/${id}`);
@@ -158,7 +155,6 @@ export const updateGoogleSheet = async (data: GoogleSheets) => {
 };
 
 export const getXpression = async (id: string) => {
-	console.log('getXpression', id);
 	const {
 		data: { results },
 	} = await axiosInstance.get(`/xpression/${id}`);

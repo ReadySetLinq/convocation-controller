@@ -10,7 +10,7 @@ const App = () => {
 	const themeStore = useAtomValue(themeState);
 
 	return (
-		<ThemeProvider theme={themeStore.theme === 'light' ? lightTheme() : darkTheme()}>
+		<ThemeProvider theme={themeStore.theme === 'light' ? lightTheme : darkTheme}>
 			<ErrorBoundary>
 				<Display />
 			</ErrorBoundary>

@@ -40,7 +40,7 @@ const NetworkDisplay: React.FC<NetworkDisplayProps> = ({ size }) => {
 		return (
 			<Button
 				variant='contained'
-				color='default'
+				color='primary'
 				aria-label='Disconnect'
 				onClick={handleDisconnect}
 				type='submit'
