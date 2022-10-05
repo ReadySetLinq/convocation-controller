@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { useAtomValue } from 'jotai/utils';
-import { Grid, Button } from '@material-ui/core';
+import { Grid, Button } from '@mui/material';
 import { isEqual } from 'lodash';
 
 import { studentsState } from '../../stores/atoms';

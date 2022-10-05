@@ -1,8 +1,8 @@
 import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { useAtomValue } from 'jotai/utils';
-import { Grid, Button, Paper } from '@material-ui/core';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Grid, Button, Paper } from '@mui/material';
+import { Alert, AlertTitle } from '@mui/lab';
 import { isEqual, isEmpty, sortBy, filter, findIndex } from 'lodash';
 import { generate } from 'shortid';
 
@@ -33,7 +33,7 @@ import { defaultEditTakeItemProps, loadingStates, Loading } from './constants/st
 import { defaultProgramName, defaultStudentData } from '../stores/constants/student-store';
 
 const Students = () => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	const [studentsStore, setStudentsStore] = useAtom(studentsState);
 	const [connectionStore, setConnectionStore] = useAtom(connectionState);
 	const isSettingsLoaded = useAtomValue(loadedSettings);
@@ -831,7 +831,7 @@ const Students = () => {
 
 	if (!isSettingsLoaded)
 		return (
-			<Grid container className={styles.grid} justify='center' spacing={1}>
+			<Grid container className={classes.grid} justify='center' spacing={1}>
 				<LoadingSpinner
 					key={`settings.LoadingSpinner-${loadStatus.current}`}
 					label={loadingStates[loadStatus.current]}
@@ -843,10 +843,10 @@ const Students = () => {
 
 	if (loadStatus.current === Loading.XPN_FAILED)
 		return (
-			<Grid container className={styles.grid} justify='center' spacing={1}>
+			<Grid container className={classes.grid} justify='center' spacing={1}>
 				<Grid item xs={3}></Grid>
 				<Grid item xs={6}>
-					<Paper className={styles.paper}>
+					<Paper className={classes.paper}>
 						<Alert key='networkConnection.Alert' severity='error' variant='outlined'>
 							<AlertTitle>{loadingStates[loadStatus.current]}</AlertTitle>
 						</Alert>
@@ -858,7 +858,7 @@ const Students = () => {
 
 	if (studentsStore.isLoading || !studentsStore.loggedIn || !studentsStore.ctrlStarted)
 		return (
-			<Grid container className={styles.grid} justify='center' spacing={1}>
+			<Grid container className={classes.grid} justify='center' spacing={1}>
 				<LoadingSpinner
 					key={`settings.LoadingSpinner2-${loadStatus.current}`}
 					label={loadingStates[loadStatus.current]}
@@ -867,10 +867,10 @@ const Students = () => {
 		);
 
 	return (
-		<div className={styles.fullWindow} tabIndex={0} onKeyDown={onKeyDown}>
-			<Grid container className={styles.grid} justify='center' spacing={1}>
+		<div className={classes.fullWindow} tabIndex={0} onKeyDown={onKeyDown}>
+			<Grid container className={classes.grid} justify='center' spacing={1}>
 				<Grid item>
-					<div className={styles.fullWidth}>
+					<div className={classes.fullWidth}>
 						<Grid container justify='center' spacing={1}>
 							<Grid item>
 								<Button

@@ -10,7 +10,7 @@ import {
 	FormHelperText,
 	Typography,
 	Slider,
-} from '@material-ui/core';
+} from '@mui/material';
 
 import { TextFormFieldProps, SelectFormFieldProps, SliderFormFieldProps } from './interfaces/form-field';
 
