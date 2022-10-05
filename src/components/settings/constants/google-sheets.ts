@@ -1,4 +1,4 @@
-import { object, number, string } from 'yup';
+import { object, string } from 'yup';
 
 import { GoogleSheetsSettingsData } from '../interfaces/google-sheets';
 

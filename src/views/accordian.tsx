@@ -1,9 +1,10 @@
 import { withStyles } from '@mui/material/styles';
+import { Theme } from '@mui/material/styles';
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionSummary from '@mui/material/AccordionSummary';
 import MuiAccordionDetails from '@mui/material/AccordionDetails';
 
-export const Accordion = withStyles({
+export const Accordion = withStyles(MuiAccordion, {
 	root: {
 		border: '1px solid rgba(0, 0, 0, .125)',
 		boxShadow: 'none',
@@ -18,9 +19,9 @@ export const Accordion = withStyles({
 		},
 	},
 	expanded: {},
-})(MuiAccordion);
+});
 
-export const AccordionSummary = withStyles({
+export const AccordionSummary = withStyles(MuiAccordionSummary, {
 	root: {
 		backgroundColor: 'rgba(0, 0, 0, .03)',
 		borderBottom: '1px solid rgba(0, 0, 0, .125)',
@@ -36,10 +37,10 @@ export const AccordionSummary = withStyles({
 		},
 	},
 	expanded: {},
-})(MuiAccordionSummary);
+});
 
-export const AccordionDetails = withStyles((theme) => ({
+export const AccordionDetails = withStyles(MuiAccordionDetails, (theme: Theme) => ({
 	root: {
 		padding: theme.spacing(2),
 	},
-}))(MuiAccordionDetails);
+}));

@@ -26,8 +26,10 @@ export const saveData = async (key: SettingsKeys, data: StorageData) =>
 export const removeData = (key: SettingsKeys) => localStorage.removeItem(`rsl.${key}`);
 
 // Export all under default
-export default {
+export const Storage = {
 	loadData,
 	saveData,
 	removeData,
 };
+
+export default Storage;

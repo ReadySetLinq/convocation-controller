@@ -37,7 +37,6 @@ export const ConvocationSelector = () => {
 
 	useEffect(() => {
 		if (!isMounted.current) return;
-		console.log('getConvocations data', data);
 
 		if (data === undefined || data.length <= 0) {
 			setConvocation({ ...defaultConvocationStoreState });

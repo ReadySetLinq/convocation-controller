@@ -6,8 +6,10 @@ export const StudentDisplay = Students;
 export const ProgramsDisplay = Programs;
 export const OnlineButtonsDisplay = OnlineButtons;
 
-export default {
+export const StudentsIndex = {
 	StudentDisplay,
 	ProgramsDisplay,
 	OnlineButtonsDisplay,
 };
+
+export default StudentsIndex;
