@@ -56,7 +56,7 @@
 		"react-scripts": "^3.4.1",
 		"shortid": "^2.2.15",
 		"tss-react": "^4.2.0",
-		"typescript": "^4.0.0",
+		"typescript": "^4.8.4",
 		"yup": "^0.29.1"
 	},
 	"eslintConfig": {
