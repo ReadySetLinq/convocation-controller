@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { Box, AppBar, Toolbar, Tab } from '@material-ui/core';
-import { TabContext, TabPanel, TabList } from '@material-ui/lab';
-import SettingsIcon from '@material-ui/icons/Settings';
-import SportsEsportsIcon from '@material-ui/icons/SportsEsports';
-import Brightness6 from '@material-ui/icons/Brightness6';
-import Brightness7 from '@material-ui/icons/Brightness7';
+import { Box, AppBar, Toolbar, Tab } from '@mui/material';
+import { TabContext, TabPanel, TabList } from '@mui/lab';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import Brightness6 from '@mui/icons-material/Brightness6';
+import Brightness7 from '@mui/icons-material/Brightness7';
 
 import { themeState, convocationState } from '../stores/atoms';
 import {
@@ -36,7 +36,7 @@ import { ThemeTypesData } from '../stores/interfaces/theme-store';
 import { MainState } from './interface/main';
 
 const Main = () => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	const [state, setState] = useState<MainState>(initialMainState);
 	const isSettingsStoreLoaded = useAtomValue(loadedSettings);
 	const convocationStore = useAtomValue(convocationState);
@@ -52,9 +52,9 @@ const Main = () => {
 	const themeToggleLabel = themeStore.theme === 'light' ? 'Enable Dark Theme' : 'Enable Light Theme';
 	const themeToggleButton =
 		themeStore.theme === 'light' ? (
-			<Brightness6 className={styles.iconButton} />
+			<Brightness6 className={classes.iconButton} />
 		) : (
-			<Brightness7 className={styles.iconButton} />
+			<Brightness7 className={classes.iconButton} />
 		);
 	const {
 		isLoading,
@@ -128,11 +128,11 @@ const Main = () => {
 	if (isLoading || isFetching || convocationQuery === undefined) return <LoadingSpinner label='Loading Settings...' />;
 
 	return (
-		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
+		<Box color='text.primary' bgcolor='background.paper' className={classes.boxWrapper} flexGrow={1} height='200vh'>
 			<TabContext value={tabIndex}>
-				<AppBar position='static' color='inherit' className={styles.appBar}>
+				<AppBar position='static' color='inherit' className={classes.appBar}>
 					<Toolbar>
-						<div className={styles.titleLeft}>
+						<div className={classes.titleLeft}>
 							<TabList
 								variant='fullWidth'
 								indicatorColor='primary'
@@ -160,14 +160,14 @@ const Main = () => {
 					</Toolbar>
 				</AppBar>
 				<TabPanel value='settings'>
-					<div className={styles.fullWidth}>
+					<div className={classes.fullWidth}>
 						<Suspense fallback={<LoadingSpinner color='secondary' />}>
 							<Settings key={'main.settings'} />
 						</Suspense>
 					</div>
 				</TabPanel>
 				<TabPanel value='controller'>
-					<div className={styles.fullWidth}>
+					<div className={classes.fullWidth}>
 						<Suspense fallback={<LoadingSpinner color='secondary' />}>
 							<Students key={'main.students'} />
 						</Suspense>

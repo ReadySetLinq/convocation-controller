@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Box, AppBar, Toolbar, Tab, Grid, Button } from '@material-ui/core';
-import { TabContext, TabPanel, TabList } from '@material-ui/lab';
-import SettingsIcon from '@material-ui/icons/Settings';
+import { Box, AppBar, Toolbar, Tab, Grid, Button } from '@mui/material';
+import { TabContext, TabPanel, TabList } from '@mui/lab';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { Field, Form, Formik, FormikHelpers } from 'formik';
 
 import { TextFormField } from '../views/form-field';
@@ -12,7 +12,7 @@ import { useStyles } from '../services/constants/styles';
 import { initialLogin, LoginProps, LoginState } from './interface/login';
 
 const Login: React.FC<LoginProps> = ({ state, setState }) => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 
 	const onLogin = useCallback(
@@ -54,11 +54,11 @@ const Login: React.FC<LoginProps> = ({ state, setState }) => {
 	}, []);
 
 	return (
-		<Box color='text.primary' bgcolor='background.paper' className={styles.boxWrapper} flexGrow={1} height='200vh'>
+		<Box color='text.primary' bgcolor='background.paper' className={classes.boxWrapper} flexGrow={1} height='200vh'>
 			<TabContext value='login'>
-				<AppBar position='static' color='inherit' className={styles.appBar}>
+				<AppBar position='static' color='inherit' className={classes.appBar}>
 					<Toolbar>
-						<div className={styles.fullWidth}>
+						<div className={classes.fullWidth}>
 							<TabList variant='fullWidth' indicatorColor='primary' textColor='primary' aria-label='Menu Bar'>
 								<Tab value='login' label='Login' aria-label='Login' icon={<SettingsIcon />} disableRipple />
 							</TabList>
@@ -66,8 +66,8 @@ const Login: React.FC<LoginProps> = ({ state, setState }) => {
 					</Toolbar>
 				</AppBar>
 				<TabPanel value='login'>
-					<div className={styles.fullWidth}>
-						<div className={styles.errorText}>{state.loginError}</div>
+					<div className={classes.fullWidth}>
+						<div className={classes.errorText}>{state.loginError}</div>
 						<Formik initialValues={initialLogin} onSubmit={onLogin}>
 							{({ values, isValid, dirty, isSubmitting }) => {
 								return (

@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Grid, Paper } from '@material-ui/core';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Grid, Paper } from '@mui/material';
+import { Alert, AlertTitle } from '@mui/lab';
 interface Props {
 	children: ReactNode;
 }
@@ -29,7 +29,7 @@ class ErrorBoundary extends Component<Props> {
 						width: '96ww',
 					}}
 				>
-					<Grid container style={{ width: '96vw', margin: '0px', padding: '1em' }} justify='center' spacing={1}>
+					<Grid container style={{ width: '96vw', margin: '0px', padding: '1em' }} spacing={1}>
 						<Grid item xs={3}></Grid>
 						<Grid item xs={6}>
 							<Alert key='errorBoundary.Alert' severity='error' variant='outlined'>
