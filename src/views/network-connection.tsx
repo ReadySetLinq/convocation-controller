@@ -18,7 +18,7 @@ const NetworkConnection = () => {
 	if (isConnectedStore) return <Fragment></Fragment>;
 
 	return (
-		<Grid container className={classes.grid} justify='center' spacing={1}>
+		<Grid container className={classes.grid} justifyContent='center' alignItems='center' spacing={1}>
 			<Grid item xs={3}></Grid>
 			<Grid item xs={6}>
 				<Paper className={classes.paper}>

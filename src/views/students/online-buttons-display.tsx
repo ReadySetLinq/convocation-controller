@@ -34,7 +34,7 @@ const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
 	);
 
 	return (
-		<Grid container justify='center' spacing={3}>
+		<Grid container justifyContent='center' alignItems='center' spacing={3}>
 			<Grid item>
 				<Button
 					color={studentsStore.isExtraOnline ? 'secondary' : 'primary'}

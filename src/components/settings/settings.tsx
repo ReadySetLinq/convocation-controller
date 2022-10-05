@@ -5,7 +5,6 @@ import { AxiosError } from 'axios';
 import { Grid, Button, Tabs, Tab, Paper } from '@mui/material';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { isEqual } from 'lodash';
-import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
 
 import {
 	loadedSettings,
@@ -170,7 +169,7 @@ const Settings = () => {
 
 	return (
 		<div className={classes.root}>
-			<Grid container className={classes.grid} justify='center' spacing={1}>
+			<Grid container className={classes.grid} justifyContent='center' alignItems='center' spacing={1}>
 				<Grid item>
 					<Formik initialValues={initialSettings} validationSchema={settingsSchema} onSubmit={onSubmit}>
 						{({ values, errors, touched, isValid, dirty, isSubmitting }) => {
@@ -250,15 +249,17 @@ const Settings = () => {
 											<Paper>
 												<div>
 													{submitErrors.network && (
-														<p className={styles.errorText}>Error saving Network changes: {submitErrors.network}</p>
+														<p className={classes.errorText}>Error saving Network changes: {submitErrors.network}</p>
 													)}
 													{submitErrors.googleSheets && (
-														<p className={styles.errorText}>
+														<p className={classes.errorText}>
 															Error saving GoogleSheets changes: {submitErrors.googleSheets}
 														</p>
 													)}
 													{submitErrors.xpression && (
-														<p className={styles.errorText}>Error saving Xpression changes: {submitErrors.xpression}</p>
+														<p className={classes.errorText}>
+															Error saving Xpression changes: {submitErrors.xpression}
+														</p>
 													)}
 												</div>
 												<TabPanel value={tabIndex} index={0}>
