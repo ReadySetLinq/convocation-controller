@@ -9,7 +9,8 @@
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
 		"rail-build": "npm i && react-scripts build",
-		"rail-start": "npm i && sh-build && react-scripts start"
+		"rail-start": "npm i && sh-build && react-scripts start",
+		"prebuild": "yarn add rimraf@3.0.2 --dev && yarn rimraf node_modules && yarn install"
 	},
 	"repository": {
 		"type": "git",
@@ -33,9 +34,10 @@
 		"@types/papaparse": "^5.0.4",
 		"@types/react": "^18.0.0",
 		"@types/react-dom": "^18.0.0",
-		"@types/shortid": "0.0.29",
-		"@types/ws": "^7.2.6",
-		"@types/yup": "^0.29.3"
+		"@types/shortid": "^0.0.29",
+		"@types/ws": "^8.5.3",
+		"@types/yup": "^0.32.0",
+		"rimraf": "3.0.2"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.4",
