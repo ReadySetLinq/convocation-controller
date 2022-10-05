@@ -48,7 +48,7 @@ const Main = () => {
 	const setNetworkStore = useSetAtom(setNetworkSettings);
 	const setLoadedStore = useSetAtom(setLoadedSettings);
 	const [themeStore, setThemeStore] = useAtom(themeState);
-	const [tabIndex, setTabIndex] = useState<string>('settings');
+	const [tabIndex, setTabIndex] = useState<string>('controller');
 	const themeToggleLabel = themeStore.theme === 'light' ? 'Enable Dark Theme' : 'Enable Light Theme';
 	const themeToggleButton =
 		themeStore.theme === 'light' ? (
@@ -109,7 +109,7 @@ const Main = () => {
 		isMounted.current = true;
 
 		Emitter.on('navTabs_onSelect', (activeKey: string) => {
-			if (isMounted.current) setState((prevState) => ({ ...prevState, navActiveKey: activeKey }));
+			if (isMounted.current) setState((prevState: MainState) => ({ ...prevState, navActiveKey: activeKey }));
 		});
 
 		if (isMounted.current) {
@@ -140,7 +140,6 @@ const Main = () => {
 								aria-label='Menu Bar'
 								onChange={handleTabChange}
 							>
-								<Tab value='settings' label='Settings' aria-label='Settings' icon={<SettingsIcon />} disableRipple />
 								<Tab
 									value='controller'
 									label='Controller'
@@ -148,6 +147,7 @@ const Main = () => {
 									icon={<SportsEsportsIcon />}
 									disableRipple
 								/>
+								<Tab value='settings' label='Settings' aria-label='Settings' icon={<SettingsIcon />} disableRipple />
 								<Tab
 									value='theme'
 									label={themeToggleLabel}
@@ -159,17 +159,17 @@ const Main = () => {
 						</div>
 					</Toolbar>
 				</AppBar>
-				<TabPanel value='settings'>
-					<div className={classes.fullWidth}>
-						<Suspense fallback={<LoadingSpinner color='secondary' />}>
-							<Settings key={'main.settings'} />
-						</Suspense>
-					</div>
-				</TabPanel>
 				<TabPanel value='controller'>
 					<div className={classes.fullWidth}>
 						<Suspense fallback={<LoadingSpinner color='secondary' />}>
 							<Students key={'main.students'} />
+						</Suspense>
+					</div>
+				</TabPanel>
+				<TabPanel value='settings'>
+					<div className={classes.fullWidth}>
+						<Suspense fallback={<LoadingSpinner color='secondary' />}>
+							<Settings key={'main.settings'} />
 						</Suspense>
 					</div>
 				</TabPanel>
