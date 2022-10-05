@@ -1,16 +1,16 @@
-import { NetworkSettingsData } from './network';
-import { GoogleSheetsSettingsData } from './google-sheets';
-import { XpnSettingsData } from './xpression';
+import { Network } from './network';
+import { GoogleSheets } from './google-sheets';
+import { Xpression } from './xpression';
 
 export interface SettingsState {
-	network: NetworkSettingsData;
-	gs: GoogleSheetsSettingsData;
-	xpn: XpnSettingsData;
+	network: Network;
+	gs: GoogleSheets;
+	xpn: Xpression;
 }
 
 export interface SettingsStoreState {
 	loaded: boolean;
-	network: NetworkSettingsData;
-	gs: GoogleSheetsSettingsData;
-	xpn: XpnSettingsData;
+	network: Network;
+	gs: GoogleSheets;
+	xpn: Xpression;
 }

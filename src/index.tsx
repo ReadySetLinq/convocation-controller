@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider } from 'jotai';
 
@@ -17,6 +17,4 @@ const Index = () => {
 	);
 };
 
-const container = document.getElementById('root');
-const root = createRoot(container!);
-root.render(<Index />);
+ReactDOM.render(<Index />, document.getElementById('root'));

@@ -1,4 +1,4 @@
-export interface XpnSettingsData {
+export type Xpression = {
 	id: string;
 	tmrDelay: number;
 	ExtraTakeID: number;
@@ -7,4 +7,4 @@ export interface XpnSettingsData {
 	Extra: string;
 	Multiplier: string;
 	Background: string;
-}
+};

@@ -1,4 +1,4 @@
-export interface GoogleSheetsSettingsData {
+export type GoogleSheets = {
 	id: string;
 	GoogleSheetsID: string;
 	StudentID: string;
@@ -7,4 +7,4 @@ export interface GoogleSheetsSettingsData {
 	Multiplier_Column: string | null;
 	Division_Column: string | null;
 	OrderBy: string | null;
-}
+};

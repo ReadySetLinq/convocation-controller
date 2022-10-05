@@ -9,9 +9,9 @@ import { clearGoogleCache } from '../services/google-sheets';
 import { defaultProgramName } from './constants/student-store';
 
 import { SettingsStoreState } from '../components/settings/interfaces/settings';
-import { GoogleSheetsSettingsData } from '../components/settings/interfaces/google-sheets';
-import { NetworkSettingsData } from '../components/settings/interfaces/network';
-import { XpnSettingsData } from '../components/settings/interfaces/xpression';
+import { GoogleSheets } from '../components/settings/interfaces/google-sheets';
+import { Network } from '../components/settings/interfaces/network';
+import { Xpression } from '../components/settings/interfaces/xpression';
 import { StudentsStoreState } from './interfaces/student-store';
 
 // Connection
@@ -48,7 +48,7 @@ export const setLoadedSettings = atom(null, (get, set, item: boolean) =>
 	set(settingsState, { ...get(settingsState), loaded: item }),
 );
 
-export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheetsSettingsData) => {
+export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheets) => {
 	const oldSettings = get(settingsState) as SettingsStoreState;
 	if (item.GoogleSheetsID !== oldSettings.gs.GoogleSheetsID) {
 		clearGoogleCache();
@@ -56,11 +56,11 @@ export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheetsS
 	return set(settingsState, { ...oldSettings, gs: item });
 });
 
-export const setNetworkSettings = atom(null, (get, set, item: NetworkSettingsData) =>
+export const setNetworkSettings = atom(null, (get, set, item: Network) =>
 	set(settingsState, { ...(get(settingsState) as SettingsStoreState), network: item }),
 );
 
-export const setXPNSettings = atom(null, (get, set, item: XpnSettingsData) =>
+export const setXPNSettings = atom(null, (get, set, item: Xpression) =>
 	set(settingsState, { ...(get(settingsState) as SettingsStoreState), xpn: item }),
 );
 

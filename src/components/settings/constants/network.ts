@@ -1,18 +1,18 @@
 import * as yup from 'yup';
 
-import { NetworkSettingsData } from '../interfaces/network';
+import { Network } from '../interfaces/network';
 
-export const defaultNetworkSettingsData: NetworkSettingsData = {
+export const defaultNetwork: Network = {
 	id: '',
-	ip: '192.168.1.53',
+	ip: 'localhost',
 	port: 8080,
-	userName: 'brtf',
+	userName: '',
 	password: '',
 };
 
-export const networkSettingsSchema: yup.ObjectSchema<NetworkSettingsData> = yup
+export const networkSettingsSchema: yup.ObjectSchema<Network> = yup
 	.object({
-		id: yup.string().default(defaultNetworkSettingsData.id).defined(),
+		id: yup.string().default(defaultNetwork.id).defined(),
 		ip: yup.string().trim().min(1, 'IP to short!').required('IP Required!'),
 		port: yup
 			.number()

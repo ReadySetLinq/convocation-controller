@@ -9,7 +9,6 @@ export const getUrl = (id: string) =>
 	`https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv&key=${process.env.REACT_APP_GOOGLE_API_KEY || ''}`;
 
 export const clearGoogleCache = () => {
-	console.log('clearGoogleCache');
 	sessionStorage.removeItem(sessionKey);
 };
 

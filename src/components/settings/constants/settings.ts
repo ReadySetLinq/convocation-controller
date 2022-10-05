@@ -2,15 +2,15 @@ import * as yup from 'yup';
 
 import { SettingsStoreState } from '../interfaces/settings';
 
-import { defaultNetworkSettingsData, networkSettingsSchema } from './network';
-import { defaultGoogleSheetsSettingsData, googleSheetsSettingsSchema } from './google-sheets';
-import { defaultXpnSettingsData, xpnSettingsSchema } from './xpression';
+import { defaultNetwork, networkSettingsSchema } from './network';
+import { defaultGoogleSheet, googleSheetsSettingsSchema } from './google-sheets';
+import { defaultXpression, xpnSettingsSchema } from './xpression';
 
 export const defaultSettingsStoreState: SettingsStoreState = {
 	loaded: false,
-	network: { ...defaultNetworkSettingsData },
-	gs: { ...defaultGoogleSheetsSettingsData },
-	xpn: { ...defaultXpnSettingsData },
+	network: { ...defaultNetwork },
+	gs: { ...defaultGoogleSheet },
+	xpn: { ...defaultXpression },
 };
 
 export const settingsSchema = yup

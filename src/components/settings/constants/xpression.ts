@@ -1,8 +1,8 @@
 import * as yup from 'yup';
 
-import { XpnSettingsData } from '../interfaces/xpression';
+import { Xpression } from '../interfaces/xpression';
 
-export const defaultXpnSettingsData: XpnSettingsData = {
+export const defaultXpression: Xpression = {
 	id: '',
 	tmrDelay: 250,
 	ExtraTakeID: 1,
@@ -13,9 +13,9 @@ export const defaultXpnSettingsData: XpnSettingsData = {
 	Background: 'bkg',
 };
 
-export const xpnSettingsSchema: yup.ObjectSchema<XpnSettingsData> = yup
+export const xpnSettingsSchema: yup.ObjectSchema<Xpression> = yup
 	.object({
-		id: yup.string().default(defaultXpnSettingsData.id).defined(),
+		id: yup.string().default(defaultXpression.id).defined(),
 		tmrDelay: yup
 			.number()
 			.integer('Timer Delay must be a number!')
@@ -35,8 +35,8 @@ export const xpnSettingsSchema: yup.ObjectSchema<XpnSettingsData> = yup
 			.max(9999, 'TakeID must be a number less than 10000!')
 			.required('TakeID Required!'),
 		Name: yup.string().trim().min(1, 'Name to short!').required('Name Required!'),
-		Extra: yup.string().trim().default(defaultXpnSettingsData.Extra).defined(),
-		Multiplier: yup.string().trim().default(defaultXpnSettingsData.Multiplier).defined(),
-		Background: yup.string().trim().default(defaultXpnSettingsData.Background).defined(),
+		Extra: yup.string().trim().default(defaultXpression.Extra).defined(),
+		Multiplier: yup.string().trim().default(defaultXpression.Multiplier).defined(),
+		Background: yup.string().trim().default(defaultXpression.Background).defined(),
 	})
 	.defined();

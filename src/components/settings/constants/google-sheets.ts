@@ -1,42 +1,42 @@
 import * as yup from 'yup';
 
-import { GoogleSheetsSettingsData } from '../interfaces/google-sheets';
+import { GoogleSheets } from '../interfaces/google-sheets';
 
-export const defaultGoogleSheetsSettingsData: GoogleSheetsSettingsData = {
+export const defaultGoogleSheet: GoogleSheets = {
 	id: '',
-	GoogleSheetsID: '2PACX-1vTl1NfHLUoYlsQkHlaqyjNV9LdRT5PAkmrYcwajaRr-cuAcTLikSwakn4PQ3Vzp_A',
+	GoogleSheetsID: '',
 	StudentID: 'ID',
-	Name_Column: 'Name for Credential',
+	Name_Column: 'Name',
 	Extra_Column: 'Dipl Program Descr',
 	Multiplier_Column: 'Multiplier',
 	Division_Column: 'Division',
 	OrderBy: '',
 };
 
-export const googleSheetsSettingsSchema: yup.ObjectSchema<GoogleSheetsSettingsData> = yup
+export const googleSheetsSettingsSchema: yup.ObjectSchema<GoogleSheets> = yup
 	.object({
-		id: yup.string().default(defaultGoogleSheetsSettingsData.id).defined(),
+		id: yup.string().default(defaultGoogleSheet.id).defined(),
 		GoogleSheetsID: yup.string().trim().min(10, 'GoogleSheetsID to short!').required('GoogleSheetsID Column Required!'),
 		StudentID: yup.string().trim().min(1, 'StudentID to short!').required('StudentID Column Required!'),
 		Name_Column: yup.string().trim().min(1, 'Name Column to short!').required('Name Column Required!'),
 		Extra_Column: yup
 			.string()
 			.trim()
-			.default(defaultGoogleSheetsSettingsData.Extra_Column ?? '')
+			.default(defaultGoogleSheet.Extra_Column ?? '')
 			.defined(),
 		Multiplier_Column: yup
 			.string()
 			.trim()
-			.default(defaultGoogleSheetsSettingsData.Multiplier_Column ?? '')
+			.default(defaultGoogleSheet.Multiplier_Column ?? '')
 			.defined(),
 		Division_Column: yup
 			.string()
 			.trim()
-			.default(defaultGoogleSheetsSettingsData.Division_Column ?? '')
+			.default(defaultGoogleSheet.Division_Column ?? '')
 			.defined(),
 		OrderBy: yup
 			.string()
-			.default(defaultGoogleSheetsSettingsData.OrderBy ?? '')
+			.default(defaultGoogleSheet.OrderBy ?? '')
 			.defined(),
 	})
 	.defined();

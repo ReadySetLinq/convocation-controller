@@ -1,95 +1,14 @@
 import axios from 'axios';
 
-export type Convocations = {
-	id: string;
-	title: string;
-};
+import { defaultConvocation } from './constants/convocation';
+import { defaultGoogleSheet } from '../components/settings/constants/google-sheets';
+import { defaultNetwork } from '../components/settings/constants/network';
+import { defaultXpression } from '../components/settings/constants/xpression';
 
-export type Convocation = {
-	id: string;
-	title: string;
-	createdAt: Date;
-	updatedAt: Date;
-	googleSheet: GoogleSheets;
-	googleSheetId: string | null;
-	network: Network;
-	networkId: string | null;
-	xpression: Xpression;
-	xpressionId: string | null;
-};
-
-export type Network = {
-	id: string;
-	ip: string;
-	port: number;
-	userName: string;
-	password: string;
-};
-
-export type GoogleSheets = {
-	id: string;
-	GoogleSheetsID: string;
-	StudentID: string;
-	Name_Column: string;
-	Extra_Column: string | null;
-	Multiplier_Column: string | null;
-	Division_Column: string | null;
-	OrderBy: string | null;
-};
-
-export type Xpression = {
-	id: string;
-	tmrDelay: number;
-	ExtraTakeID: number;
-	TakeID: number;
-	Name: string;
-	Extra: string;
-	Multiplier: string;
-	Background: string;
-};
-
-export const defaultNetwork: Network = {
-	id: '',
-	ip: 'localhost',
-	port: 8080,
-	userName: '',
-	password: '',
-};
-
-export const defaultGoogleSheet: GoogleSheets = {
-	id: '',
-	GoogleSheetsID: '',
-	StudentID: 'ID',
-	Name_Column: 'Name',
-	Extra_Column: 'Dipl Program Descr',
-	Multiplier_Column: 'Multiplier',
-	Division_Column: 'Division',
-	OrderBy: '',
-};
-
-export const defaultXpression: Xpression = {
-	id: '',
-	tmrDelay: 250,
-	ExtraTakeID: 1,
-	TakeID: 2,
-	Name: 'txtName',
-	Extra: 'txtOther',
-	Multiplier: 'txtMultiplier',
-	Background: 'bkg',
-};
-
-export const defaultConvocation: Convocation = {
-	id: '',
-	title: 'Fall 2022',
-	googleSheet: defaultGoogleSheet,
-	googleSheetId: null,
-	network: defaultNetwork,
-	networkId: null,
-	xpression: defaultXpression,
-	xpressionId: null,
-	createdAt: new Date(),
-	updatedAt: new Date(),
-};
+import { Convocations, Convocation } from './interfaces/convocation';
+import { GoogleSheets } from '../components/settings/interfaces/google-sheets';
+import { Network } from '../components/settings/interfaces/network';
+import { Xpression } from '../components/settings/interfaces/xpression';
 
 export const axiosInstance = axios.create({
 	baseURL: `${process.env.REACT_APP_API_URL}`,

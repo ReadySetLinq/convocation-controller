@@ -1,7 +1,7 @@
 import Emitter from './emitter';
-import { NetworkSettingsData } from '../components/settings/interfaces/network';
+import { Network } from '../components/settings/interfaces/network';
 
-import { defaultNetworkSettingsData } from '../components/settings/constants/network';
+import { defaultNetwork } from '../components/settings/constants/network';
 
 interface StatusType {
 	autoReconnect: boolean;
@@ -15,12 +15,12 @@ export class Websockets {
 	connectInterval: number = 0;
 	connectTimeout: number = 0;
 	status: StatusType = { autoReconnect: true, connecting: false, connected: false };
-	data: NetworkSettingsData = {
-		id: defaultNetworkSettingsData.id,
-		ip: defaultNetworkSettingsData.ip,
-		port: defaultNetworkSettingsData.port,
-		userName: defaultNetworkSettingsData.userName,
-		password: defaultNetworkSettingsData.password,
+	data: Network = {
+		id: defaultNetwork.id,
+		ip: defaultNetwork.ip,
+		port: defaultNetwork.port,
+		userName: defaultNetwork.userName,
+		password: defaultNetwork.password,
 	};
 
 	constructor() {
@@ -38,7 +38,7 @@ export class Websockets {
 		Emitter.off('ws.isConnected');
 	};
 
-	updateData = (networkSettings: NetworkSettingsData) => {
+	updateData = (networkSettings: Network) => {
 		this.data = { ...this.data, ...networkSettings };
 	};
 
