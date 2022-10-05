@@ -1,4 +1,4 @@
-import * as yup from 'yup';
+import { object } from 'yup';
 
 import { SettingsStoreState } from '../interfaces/settings';
 
@@ -13,13 +13,11 @@ export const defaultSettingsStoreState: SettingsStoreState = {
 	xpn: { ...defaultXpnSettingsData },
 };
 
-export const settingsSchema = yup
-	.object({
-		network: networkSettingsSchema,
-		gs: googleSheetsSettingsSchema,
-		xpn: xpnSettingsSchema,
-	})
-	.defined();
+export const settingsSchema = object({
+	network: networkSettingsSchema,
+	gs: googleSheetsSettingsSchema,
+	xpn: xpnSettingsSchema,
+}).defined();
 
 export const defaultSettings: SettingsStoreState = {
 	loaded: false,
