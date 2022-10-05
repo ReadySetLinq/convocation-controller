@@ -1,14 +1,14 @@
 import React, { Fragment } from 'react';
 import { useAtomValue } from 'jotai';
-import { Grid, Paper } from '@material-ui/core';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Grid, Paper } from '@mui/material';
+import { Alert, AlertTitle } from '@mui/lab';
 
 import { useStyles } from '../services/constants/styles';
 import { isConnected, isConnecting, connectionMessage } from '../stores/selectors';
 import NetworkDisplay from './network-display';
 
 const NetworkConnection = () => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	const isConnectedStore = useAtomValue(isConnected);
 	const isConnectingStore = useAtomValue(isConnecting);
 	const connectionMessageStore = useAtomValue(connectionMessage);
@@ -18,10 +18,10 @@ const NetworkConnection = () => {
 	if (isConnectedStore) return <Fragment></Fragment>;
 
 	return (
-		<Grid container className={styles.grid} justify='center' spacing={1}>
+		<Grid container className={classes.grid} justifyContent='center' alignItems='center' spacing={1}>
 			<Grid item xs={3}></Grid>
 			<Grid item xs={6}>
-				<Paper className={styles.paper}>
+				<Paper className={classes.paper}>
 					<Alert
 						key='networkConnection.Alert'
 						severity={severity}

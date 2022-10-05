@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAtomValue } from 'jotai/utils';
-import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material/styles';
 import { themeState } from '../stores/atoms';
 import { lightTheme, darkTheme } from '../services/constants/styles';
 import ErrorBoundary from '../views/boundaries';

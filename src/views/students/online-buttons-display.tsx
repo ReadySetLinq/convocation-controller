@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { useAtomValue } from 'jotai/utils';
-import { Grid, Button } from '@material-ui/core';
+import { Grid, Button } from '@mui/material';
 import { isEqual } from 'lodash';
 
 import { studentsState } from '../../stores/atoms';
@@ -34,7 +34,7 @@ const OnlineButtonsDisplay: React.FC<OnlineButtonsDisplayData> = ({
 	);
 
 	return (
-		<Grid container justify='center' spacing={3}>
+		<Grid container justifyContent='center' alignItems='center' spacing={3}>
 			<Grid item>
 				<Button
 					color={studentsStore.isExtraOnline ? 'secondary' : 'primary'}

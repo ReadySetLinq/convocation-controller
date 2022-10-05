@@ -16,7 +16,7 @@ import {
 	TableBody,
 	TableFooter,
 	TablePagination,
-} from '@material-ui/core';
+} from '@mui/material';
 import { isEqual, includes, findIndex, isEmpty } from 'lodash';
 import { generate } from 'shortid';
 
@@ -28,7 +28,7 @@ import { PaginationTableActions } from '../pagination-table';
 import { StudentDisplayData } from './interfaces/student-display';
 
 const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	const [studentsStore, setStudentsStore] = useAtom(studentsState);
 	const googleSheetsStore = useAtomValue(googleSheetsSettings);
 	const students = useAtomValue(getProgramStudents);
@@ -149,11 +149,11 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 	}, [studentsStore]);
 
 	return (
-		<FormControl component='fieldset' className={styles.formControl}>
-			<FormGroup row className={styles.formGroup}>
+		<FormControl component='fieldset' className={classes.formControl}>
+			<FormGroup row className={classes.formGroup}>
 				<TextField
 					id={`SelectedIndex-${generate()}`}
-					className={styles.formTextField}
+					className={classes.formTextField}
 					type='number'
 					name='SelectedIndex'
 					variant='standard'
@@ -200,10 +200,10 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 				/>
 			</FormGroup>
 
-			<FormGroup row className={styles.formGroup}>
+			<FormGroup row className={classes.formGroup}>
 				<TextField
 					id={`SelectedIndex-${generate()}`}
-					className={styles.formTextField}
+					className={classes.formTextField}
 					type='text'
 					name='SelectedIndex'
 					variant='standard'
@@ -236,13 +236,13 @@ const StudentDisplay: React.FC<StudentDisplayData> = ({ getStudentData }) => {
 			</FormGroup>
 
 			<TableContainer component={Paper}>
-				<Table className={styles.table} aria-label='custom pagination table'>
+				<Table className={classes.table} aria-label='custom pagination table'>
 					<TableHead>
 						<TableRow>
-							<TableCell className={styles.tableHeader} aria-label='ID' align='left'>
+							<TableCell className={classes.tableHeader} aria-label='ID' align='left'>
 								ID
 							</TableCell>
-							<TableCell className={styles.tableHeader} aria-label='Display Name' align='center'>
+							<TableCell className={classes.tableHeader} aria-label='Display Name' align='center'>
 								Name
 							</TableCell>
 						</TableRow>

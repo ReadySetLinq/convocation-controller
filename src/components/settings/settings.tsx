@@ -2,9 +2,9 @@ import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
+import { Grid, Button, Tabs, Tab, Paper } from '@mui/material';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { isEqual } from 'lodash';
-import { Grid, Button, Tabs, Tab, Paper } from '@material-ui/core';
 
 import {
 	loadedSettings,
@@ -41,7 +41,7 @@ const defaultErrorType: errorType = {
 };
 
 const Settings = () => {
-	const styles = useStyles();
+	const { classes } = useStyles();
 	const isSettingsLoaded = useAtomValue(loadedSettings);
 	const googleSheetsStore = useAtomValue(googleSheetsSettings);
 	const networkStore = useAtomValue(networkSettings);
@@ -168,8 +168,8 @@ const Settings = () => {
 	if (!isSettingsLoaded) return <LoadingSpinner key={'settings.LoadingSpinner'} />;
 
 	return (
-		<div className={styles.root}>
-			<Grid container className={styles.grid} justify='center' spacing={1}>
+		<div className={classes.root}>
+			<Grid container className={classes.grid} justifyContent='center' alignItems='center' spacing={1}>
 				<Grid item>
 					<Formik initialValues={initialSettings} validationSchema={settingsSchema} onSubmit={onSubmit}>
 						{({ values, errors, touched, isValid, dirty, isSubmitting }) => {
@@ -201,7 +201,7 @@ const Settings = () => {
 							return (
 								<Form>
 									<Grid item>
-										<div className={`${styles.tabRoot} && ${styles.fullWidth}`}>
+										<div className={`${classes.tabRoot} && ${classes.fullWidth}`}>
 											<Tabs
 												variant='fullWidth'
 												indicatorColor='primary'
@@ -214,9 +214,9 @@ const Settings = () => {
 													label={`${tabProps.network.changed}[Network${tabProps.network.error}]`}
 													className={
 														tabProps.network.error !== ''
-															? styles.errorText
+															? classes.errorText
 															: tabProps.network.changed !== ''
-															? styles.changedText
+															? classes.changedText
 															: undefined
 													}
 													{...a11yProps(0)}
@@ -226,9 +226,9 @@ const Settings = () => {
 													label={`${tabProps.gs.changed}[Google Sheets${tabProps.gs.error}]`}
 													className={
 														tabProps.gs.error !== ''
-															? styles.errorText
+															? classes.errorText
 															: tabProps.gs.changed !== ''
-															? styles.changedText
+															? classes.changedText
 															: undefined
 													}
 													{...a11yProps(1)}
@@ -238,9 +238,9 @@ const Settings = () => {
 													label={`${tabProps.xpn.changed}[Xpression${tabProps.xpn.error}]`}
 													className={
 														tabProps.xpn.error !== ''
-															? styles.errorText
+															? classes.errorText
 															: tabProps.xpn.changed !== ''
-															? styles.changedText
+															? classes.changedText
 															: undefined
 													}
 													{...a11yProps(2)}
@@ -249,15 +249,17 @@ const Settings = () => {
 											<Paper>
 												<div>
 													{submitErrors.network && (
-														<p className={styles.errorText}>Error saving Network changes: {submitErrors.network}</p>
+														<p className={classes.errorText}>Error saving Network changes: {submitErrors.network}</p>
 													)}
 													{submitErrors.googleSheets && (
-														<p className={styles.errorText}>
+														<p className={classes.errorText}>
 															Error saving GoogleSheets changes: {submitErrors.googleSheets}
 														</p>
 													)}
 													{submitErrors.xpression && (
-														<p className={styles.errorText}>Error saving Xpression changes: {submitErrors.xpression}</p>
+														<p className={classes.errorText}>
+															Error saving Xpression changes: {submitErrors.xpression}
+														</p>
 													)}
 												</div>
 												<TabPanel value={tabIndex} index={0}>

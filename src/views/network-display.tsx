@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useAtomValue } from 'jotai';
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 
 import Emitter from '../services/emitter';
 import { isConnected, isConnecting } from '../stores/selectors';
