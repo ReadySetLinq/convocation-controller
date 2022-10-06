@@ -440,6 +440,8 @@ const Students = () => {
 						if (!isMounted.current) return;
 						const _studentsProgram = getDataValue(student, Extra_Column ?? '');
 						const _studentsDivision = getDataValue(student, Division_Column ?? '');
+						const _curName = getDataValue(student, Name_Column);
+						const _studentID = getDataValue(student, StudentID);
 
 						// used to keep the id order of the default GoogleSheets import
 						student['gs_id'] = gs_id;
@@ -449,6 +451,10 @@ const Students = () => {
 							if (!_programs.includes(_studentsProgram)) {
 								_programs.push(_studentsProgram);
 							}
+						}
+
+						if (isEmpty(_curName) || isEmpty(_studentID)) {
+							return;
 						}
 
 						if (Extra_Column !== null) {
@@ -461,8 +467,6 @@ const Students = () => {
 
 						if (!isEmpty(Multiplier) && !isEmpty(Multiplier_Column) && Extra_Column !== null) {
 							// Check for people with the same name and get count
-							const _curName = getDataValue(student, Name_Column);
-							const _studentID = getDataValue(student, StudentID);
 							let _multiple = filter(_students, (s: any) => {
 								return (
 									!isEqual(_studentID, getDataValue(s, StudentID)) &&
@@ -481,10 +485,10 @@ const Students = () => {
 									);
 								});
 								// Update existing student with multiple now found
-								if (_idx !== -1 && _students[_idx]) _students[_idx][Multiplier_Column] = 1;
+								if (_idx !== -1 && _students[_idx]) _students[_idx][Multiplier_Column] = 0;
 							}
 
-							if (Multiplier_Column !== null) student[Multiplier_Column] = _multiple === 0 ? 0 : _multiple + 1;
+							if (Multiplier_Column !== null) student[Multiplier_Column] = _multiple <= 1 ? 0 : _multiple + 1;
 						}
 
 						// Add new student

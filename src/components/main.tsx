@@ -85,7 +85,6 @@ const Main = () => {
 
 		if (!isLoading && !isFetching && convocationQuery !== undefined) {
 			const { googleSheet, xpression, network } = convocationQuery;
-			console.log('convocationQuery', convocationQuery);
 			if (googleSheet !== googleSheetsStore) setGoogleSheetsStore({ ...googleSheetsStore, ...googleSheet });
 			if (xpression !== xpnStore) setXPNStore({ ...xpnStore, ...xpression });
 			if (network !== networkStore) setNetworkStore({ ...networkStore, ...network });

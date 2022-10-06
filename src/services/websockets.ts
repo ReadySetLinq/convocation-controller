@@ -40,7 +40,6 @@ export class Websockets {
 
 	updateData = (networkSettings: NetworkSettingsData) => {
 		this.data = { ...this.data, ...networkSettings };
-		console.log('ws updateData', this.data);
 	};
 
 	// * Websocket Functions
@@ -56,7 +55,6 @@ export class Websockets {
 		};
 
 		try {
-			console.log('ws connect', `ws://${this.data.ip}:${this.data.port}`);
 			if (!this.ws) this.ws = new WebSocket(`ws://${this.data.ip}:${this.data.port}`);
 
 			// websocket onopen event listener
