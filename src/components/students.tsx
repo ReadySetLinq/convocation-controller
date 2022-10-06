@@ -1,13 +1,16 @@
 import React, { useEffect, useCallback, useMemo, useRef } from 'react';
-import { useAtom } from 'jotai';
-import { useAtomValue } from 'jotai/utils';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { Grid, Button, Paper } from '@mui/material';
 import { Alert, AlertTitle } from '@mui/lab';
 import { isEqual, isEmpty, sortBy, filter, findIndex } from 'lodash';
 import { generate } from 'shortid';
 
-import { connectionState, studentsState } from '../stores/atoms';
+import { studentsState } from '../stores/atoms';
 import {
+	setConnected,
+	setIsConnecting,
+	setConnectionMessage,
+	isConnected,
 	loadedSettings,
 	googleSheetsSettings,
 	xpnSettings,
@@ -19,7 +22,7 @@ import Emitter from '../services/emitter';
 import NetworkConnection from '../views/network-connection';
 import { useStyles } from '../services/constants/styles';
 import { getDataValue, connection } from '../services/utilities';
-import { gsData, clearGoogleCache } from '../services/google-sheets';
+import { clearGoogleCache, gsData } from '../services/google-sheets';
 import LoadingSpinner from '../views/loading-spinner';
 import { StudentDisplay, ProgramsDisplay, OnlineButtonsDisplay } from '../views/students';
 
@@ -35,7 +38,10 @@ import { defaultProgramName, defaultStudentData } from '../stores/constants/stud
 const Students = () => {
 	const { classes } = useStyles();
 	const [studentsStore, setStudentsStore] = useAtom(studentsState);
-	const [connectionStore, setConnectionStore] = useAtom(connectionState);
+	const setConnectedStore = useSetAtom(setConnected);
+	const setIsConnectingStore = useSetAtom(setIsConnecting);
+	const setConnectionMessageStore = useSetAtom(setConnectionMessage);
+	const isConnectedStore = useAtomValue(isConnected);
 	const isSettingsLoaded = useAtomValue(loadedSettings);
 	const googleSheetsStore = useAtomValue(googleSheetsSettings);
 	const xpnStore = useAtomValue(xpnSettings);
@@ -47,10 +53,7 @@ const Students = () => {
 		[studentsStore],
 	);
 	const nextIndex = useMemo(() => (studentsStore !== undefined ? studentsStore.selectedIndex + 1 : 1), [studentsStore]);
-	const googleSheetsData = useMemo(() => {
-		if (connectionStore.connected) return gsData(googleSheetsStore.GoogleSheetsID);
-		return Promise.resolve({} as gsObject);
-	}, [connectionStore.connected, googleSheetsStore.GoogleSheetsID]);
+	const googleSheetsData = gsData(googleSheetsStore.GoogleSheetsID);
 	let prevStudentsStore = useRef<StudentsStoreState>(studentsStore);
 	let isMounted = useRef<boolean>(false); // Only update states if we are still mounted after loading
 	let loadStatus = useRef<Loading>(Loading.CHECKING);
@@ -397,7 +400,6 @@ const Students = () => {
 		(forceOffline: boolean = false) => {
 			const { Multiplier } = xpnStore;
 			const { StudentID, Name_Column, Extra_Column, Multiplier_Column, Division_Column, OrderBy } = googleSheetsStore;
-
 			if (!isMounted.current) return;
 
 			loadStatus.current = Loading.LOADING_STUDENTS;
@@ -421,7 +423,7 @@ const Students = () => {
 
 					loadStatus.current = Loading.PROCESSING_STUDENTS;
 
-					if (response.errors.length > 0 || response.meta.aborted) {
+					if (response.errors?.length > 0 || response.meta?.aborted) {
 						setStudentsStore((oldStore: StudentsStoreState) => ({
 							...oldStore,
 							students: [..._students],
@@ -649,19 +651,17 @@ const Students = () => {
 		[resetData],
 	);
 
-	const reloadData = useCallback(() => {
+	const reloadData = useCallback(async () => {
 		if (!isMounted.current) return;
-		clearGoogleCache(); // Clear the google sheets data cache before loading the students again
-		if (connectionStore !== undefined && connectionStore.connected) {
-			getStudents();
-		}
-	}, [connectionStore, getStudents]);
+		await clearGoogleCache();
+		getStudents();
+	}, [getStudents]);
 
 	const onKeyDown = useCallback(
 		(event: React.KeyboardEvent<HTMLDivElement>) => {
 			if (!isMounted.current) return;
 
-			if (connectionStore.connected && studentsStore.loggedIn && studentsStore.ctrlStarted) {
+			if (isConnectedStore && studentsStore.loggedIn && studentsStore.ctrlStarted) {
 				if (!event.altKey && !event.shiftKey) {
 					switch (event.key) {
 						case 'ArrowLeft':
@@ -686,7 +686,7 @@ const Students = () => {
 			}
 		},
 		[
-			connectionStore.connected,
+			isConnectedStore,
 			goToLast,
 			goToNext,
 			studentsLength,
@@ -700,19 +700,27 @@ const Students = () => {
 	useEffect(() => {
 		isMounted.current = true;
 
-		Emitter.on('network.connecting', (message: string) =>
-			setConnectionStore({ connected: false, connecting: true, displayMsg: message }),
-		);
-		Emitter.on('network.connected', (message: string) =>
-			setConnectionStore({ connected: true, connecting: false, displayMsg: message }),
-		);
-		Emitter.on('network.disconnected', (message: string) =>
-			setConnectionStore({ connected: false, connecting: false, displayMsg: message }),
-		);
+		Emitter.on('network.connecting', (displayMsg: string) => {
+			setConnectedStore(false);
+			setIsConnectingStore(true);
+			setConnectionMessageStore(displayMsg);
+		});
+		Emitter.on('network.connected', (displayMsg: string) => {
+			setConnectedStore(true);
+			setIsConnectingStore(false);
+			setConnectionMessageStore(displayMsg);
+		});
+		Emitter.on('network.disconnected', (displayMsg: string) => {
+			setConnectedStore(false);
+			setIsConnectingStore(false);
+			setConnectionMessageStore(displayMsg);
+		});
 
-		Emitter.on('conn.status', ({ connected = false, connecting = false, displayMsg = '' }) =>
-			setConnectionStore({ connected, connecting, displayMsg }),
-		);
+		Emitter.on('conn.status', ({ connected = false, connecting = false, displayMsg = '' }) => {
+			setConnectedStore(connected);
+			setIsConnectingStore(connecting);
+			setConnectionMessageStore(displayMsg);
+		});
 
 		Emitter.on('xpression.loggedIn', () => {
 			if (!isMounted.current) return;
@@ -727,7 +735,9 @@ const Students = () => {
 			Emitter.emit('conn.disconnect', {});
 			setTimeout(() => {
 				if (!isMounted.current) return;
-				setConnectionStore({ connected: false, connecting: false, displayMsg: value.data.message });
+				setConnectedStore(false);
+				setIsConnectingStore(false);
+				setConnectionMessageStore(value.data.message);
 			}, 1500);
 		});
 
@@ -748,7 +758,7 @@ const Students = () => {
 			setStudentsStore((oldStore: StudentsStoreState) => ({ ...oldStore, ctrlStarted: true }));
 
 			if (prevStudentsStore.current.ctrlStarted) {
-				if (connectionStore.connected) getStudents();
+				getStudents();
 				return;
 			} else prevStudentsStore.current = { ...prevStudentsStore.current, ctrlStarted: true };
 
@@ -777,7 +787,7 @@ const Students = () => {
 				takeID: TakeID,
 			});
 
-			if (connectionStore.connected) getStudents();
+			getStudents();
 		});
 
 		Emitter.emit('conn.getStatus', {});
@@ -839,7 +849,7 @@ const Students = () => {
 			</Grid>
 		);
 
-	if (!connectionStore.connected) return <NetworkConnection key={'students.NetworkConnection'} />;
+	if (!isConnectedStore) return <NetworkConnection key={'students.NetworkConnection'} />;
 
 	if (loadStatus.current === Loading.XPN_FAILED)
 		return (
@@ -879,7 +889,7 @@ const Students = () => {
 									onClick={reloadData}
 									disabled={studentsStore.switching ? true : false}
 								>
-									Reload
+									{studentsStore.programs.length <= 1 ? 'Load Students' : 'Reload Students'}
 								</Button>
 							</Grid>
 							<Grid item>

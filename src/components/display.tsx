@@ -31,9 +31,6 @@ export const Display = () => {
 			})
 			.catch((e) => {
 				if (!e.error || e.error !== 'not found') console.error(e);
-			})
-			.finally(() => {
-				console.log('themeStore', themeStore);
 			});
 	}, [setThemeStore, themeStore]);
 

@@ -8,9 +8,9 @@ import { gsObject } from './interfaces/google-sheets';
 export const getUrl = (id: string) =>
 	`https://docs.google.com/spreadsheets/u/1/d/e/${id}/pub?output=csv&key=${process.env.REACT_APP_GOOGLE_API_KEY || ''}`;
 
-export const clearGoogleCache = () => {
-	console.log('clearGoogleCache');
+export const clearGoogleCache = async () => {
 	sessionStorage.removeItem(sessionKey);
+	return true;
 };
 
 type CachedJSON = {
@@ -43,7 +43,7 @@ export const gsData = async (spreadsheetId: string): Promise<gsObject> => {
 					sessionKey,
 					encodeUnicode(JSON.stringify({ sheet: data, ttl: new Date().getTime() + ONE_HOUR })),
 				);
-				return resolve(data);
+				return resolve({ ...defaultSheetsResponse, ...data });
 			}
 			throw new Error('No data found');
 		} catch (e) {
@@ -63,8 +63,8 @@ const fetchData = async (id: string) =>
 			error: (e) => {
 				return reject(e);
 			},
-			complete: (results) => {
-				return resolve({ ...defaultSheetsResponse, ...(results as unknown as gsObject) });
+			complete: (results: unknown) => {
+				return resolve({ ...defaultSheetsResponse, ...(results as gsObject) });
 			},
 		});
 	});

@@ -40,6 +40,7 @@ export class Websockets {
 
 	updateData = (networkSettings: NetworkSettingsData) => {
 		this.data = { ...this.data, ...networkSettings };
+		console.log('ws updateData', this.data);
 	};
 
 	// * Websocket Functions
@@ -55,6 +56,7 @@ export class Websockets {
 		};
 
 		try {
+			console.log('ws connect', `ws://${this.data.ip}:${this.data.port}`);
 			if (!this.ws) this.ws = new WebSocket(`ws://${this.data.ip}:${this.data.port}`);
 
 			// websocket onopen event listener
@@ -78,6 +80,7 @@ export class Websockets {
 
 			// websocket onclose event listener
 			this.ws.onclose = (ev: CloseEvent) => {
+				console.log('ws onclose', ev.currentTarget);
 				this.timeout = this.timeout + this.timeout; //increment retry interval
 
 				if (this.status.autoReconnect) {
@@ -97,6 +100,7 @@ export class Websockets {
 
 			// websocket onerror event listener
 			this.ws.onerror = (ev: Event) => {
+				console.log('ws onclose', ev.currentTarget);
 				Emitter.emit('ws.onError', {
 					event: ev,
 				});

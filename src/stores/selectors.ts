@@ -48,10 +48,10 @@ export const setLoadedSettings = atom(null, (get, set, item: boolean) =>
 	set(settingsState, { ...get(settingsState), loaded: item }),
 );
 
-export const setGoogleSheetsSettings = atom(null, (get, set, item: GoogleSheetsSettingsData) => {
+export const setGoogleSheetsSettings = atom(null, async (get, set, item: GoogleSheetsSettingsData) => {
 	const oldSettings = get(settingsState) as SettingsStoreState;
 	if (item.GoogleSheetsID !== oldSettings.gs.GoogleSheetsID) {
-		clearGoogleCache();
+		await clearGoogleCache();
 	}
 	return set(settingsState, { ...oldSettings, gs: item });
 });
